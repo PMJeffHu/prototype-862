@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>付款账户列表</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    font-size: 13px;
+    color: rgba(0,0,0,.85);
+    background: #f0f2f5;
+  }
+
+  /* ===== 整体布局 ===== */
+  .layout { display: flex; min-height: 100vh; }
+
+  /* ===== 侧边栏 ===== */
+  .sider {
+    width: 208px;
+    flex: 0 0 208px;
+    background: #001529;
+    transition: width .2s, flex-basis .2s;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .sider.collapsed { width: 64px; flex-basis: 64px; }
+
+  .sider-logo {
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 0 12px 0 20px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    white-space: nowrap;
+    background: #002140;
+  }
+  .sider-logo .logo-text { transition: opacity .2s; overflow: hidden; }
+  .sider.collapsed .logo-text { opacity: 0; width: 0; }
+  .sider.collapsed .sider-logo { justify-content: center; padding: 0; }
+
+  .sider-logo .collapse-btn {
+    width: 26px; height: 26px;
+    flex: 0 0 26px;
+    border: none;
+    background: transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+    color: rgba(255,255,255,.65);
+    display: flex; align-items: center; justify-content: center;
+    transition: color .2s, background .2s;
+  }
+  .sider-logo .collapse-btn:hover { color: #fff; background: rgba(255,255,255,.12); }
+
+  .sider-menu { list-style: none; padding: 8px 0; flex: 1; }
+  .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 40px;
+    padding: 0 20px;
+    color: rgba(255,255,255,.65);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color .2s, background .2s;
+  }
+  .menu-item .mi-icon {
+    width: 16px;
+    flex: 0 0 16px;
+    text-align: center;
+    font-size: 14px;
+    font-style: normal;
+  }
+  .menu-item .mi-text { transition: opacity .2s; overflow: hidden; }
+  .menu-item:hover { color: #fff; background: rgba(255,255,255,.06); }
+  .menu-item.active { color: #fff; background: #1890ff; }
+
+  .sider.collapsed .menu-item { padding: 0 24px; }
+  .sider.collapsed .mi-text { opacity: 0; width: 0; }
+
+  /* ===== 右侧主区域 ===== */
+  .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+  .header {
+    height: 48px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 16px;
+    border-bottom: 1px solid #f0f0f0;
+    flex: 0 0 48px;
+  }
+  .header .header-title { font-size: 15px; font-weight: 500; }
+
+  /* ===== Tab 页签 ===== */
+  .tabs {
+    background: #fff;
+    padding: 8px 16px 0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .tabs .tab {
+    display: inline-block;
+    padding: 8px 4px;
+    margin-right: 24px;
+    color: rgba(0,0,0,.65);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+  }
+  .tabs .tab.active {
+    color: #1890ff;
+    border-bottom-color: #1890ff;
+    font-weight: 500;
+  }
+
+  /* ===== 主体 ===== */
+  .page { padding: 12px 16px 24px; }
+
+  /* ===== 筛选区 ===== */
+  .filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 8px;
+    margin-bottom: 12px;
+  }
+  .filter-item { display: flex; align-items: center; gap: 6px; }
+  .filter-item label {
+    color: rgba(0,0,0,.65);
+    white-space: nowrap;
+    font-size: 13px;
+  }
+  select, .filter-item input[type="text"] {
+    height: 30px;
+    padding: 0 8px;
+    border: 1px solid #d9d9d9;
+    border-radius: 2px;
+    background: #fff;
+    font-size: 13px;
+    color: rgba(0,0,0,.85);
+    outline: none;
+    min-width: 120px;
+  }
+  select { min-width: 96px; padding-right: 24px;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bfbfbf'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+  }
+  select:hover, .filter-item input:hover { border-color: #40a9ff; }
+  select:focus, .filter-item input:focus { border-color: #40a9ff; box-shadow: 0 0 0 2px rgba(24,144,255,.1); }
+
+  .btn {
+    height: 30px;
+    padding: 0 14px;
+    border: 1px solid #d9d9d9;
+    border-radius: 2px;
+    background: #fff;
+    font-size: 13px;
+    cursor: pointer;
+    color: rgba(0,0,0,.85);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+  }
+  .btn:hover { border-color: #40a9ff; color: #40a9ff; }
+  .btn-primary {
+    background: #1890ff;
+    border-color: #1890ff;
+    color: #fff;
+  }
+  .btn-primary:hover { background: #40a9ff; border-color: #40a9ff; color: #fff; }
+
+  /* ===== 表格卡片 ===== */
+  .table-card {
+    background: #fff;
+    border-radius: 2px;
+    padding: 12px 16px 16px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.03);
+  }
+  .table-toolbar { display: flex; justify-content: flex-end; margin-bottom: 12px; }
+
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  thead th {
+    background: #fafafa;
+    color: rgba(0,0,0,.85);
+    font-weight: 500;
+    text-align: left;
+    padding: 10px 10px;
+    border-bottom: 1px solid #f0f0f0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  tbody td {
+    padding: 10px 10px;
+    border-bottom: 1px solid #f0f0f0;
+    color: rgba(0,0,0,.75);
+    vertical-align: top;
+    word-break: break-all;
+  }
+  tbody tr:hover td { background: #fafafa; }
+
+  /* 操作链接 */
+  .actions { white-space: nowrap; }
+  .actions a {
+    color: #1890ff;
+    text-decoration: none;
+    margin-right: 10px;
+    cursor: pointer;
+  }
+  .actions a:hover { color: #40a9ff; }
+  .actions a.danger { color: #ff4d4f; }
+  .actions a.danger:hover { color: #ff7875; }
+
+  /* ===== 分页 ===== */
+  .pagination {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    color: rgba(0,0,0,.65);
+    font-size: 13px;
+  }
+  .pagination .pg-btn {
+    min-width: 28px;
+    height: 28px;
+    border: 1px solid #d9d9d9;
+    border-radius: 2px;
+    background: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: rgba(0,0,0,.65);
+  }
+  .pagination .pg-btn.active { border-color: #1890ff; color: #1890ff; }
+  .pagination .pg-btn:hover { border-color: #40a9ff; color: #40a9ff; }
+  .pagination .ellipsis { color: rgba(0,0,0,.45); }
+  .pagination select { height: 28px; min-width: 80px; }
+  .pagination .jump input {
+    width: 40px; height: 28px;
+    border: 1px solid #d9d9d9; border-radius: 2px;
+    text-align: center; outline: none;
+  }
+
+  /* ===== 新增弹窗 ===== */
+  .modal-mask {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.45);
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    overflow-y: auto;
+    z-index: 1000;
+    padding: 40px 16px;
+  }
+  .modal-mask.open { display: flex; }
+
+  .modal {
+    width: 640px;
+    max-width: 100%;
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 6px 16px rgba(0,0,0,.12);
+  }
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .modal-header .modal-title { font-size: 15px; font-weight: 600; }
+  .modal-close {
+    border: none;
+    background: transparent;
+    font-size: 16px;
+    color: rgba(0,0,0,.45);
+    cursor: pointer;
+    width: 26px; height: 26px;
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .modal-close:hover { background: #f0f0f0; color: rgba(0,0,0,.85); }
+
+  .modal-body { padding: 20px 24px 4px; max-height: 68vh; overflow-y: auto; }
+
+  .form-item { display: flex; margin-bottom: 14px; }
+  .form-label {
+    flex: 0 0 130px;
+    padding-top: 6px;
+    text-align: right;
+    color: rgba(0,0,0,.85);
+  }
+  .form-label .req { color: #ff4d4f; margin-right: 2px; }
+  .form-controls { flex: 1; min-width: 0; margin-left: 10px; }
+
+  .form-controls select,
+  .form-controls input[type="text"] {
+    width: 100%;
+    height: 30px;
+    padding: 0 8px;
+    border: 1px solid #d9d9d9;
+    border-radius: 2px;
+    font-size: 13px;
+    color: rgba(0,0,0,.85);
+    outline: none;
+    background: #fff;
+  }
+  .form-controls select {
+    padding-right: 24px;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bfbfbf'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+  }
+  .form-controls select:hover, .form-controls input:hover { border-color: #40a9ff; }
+  .form-controls select:focus, .form-controls input:focus { border-color: #40a9ff; box-shadow: 0 0 0 2px rgba(24,144,255,.1); }
+
+  .form-hint { margin-top: 4px; color: rgba(0,0,0,.45); font-size: 12px; line-height: 1.5; }
+  .form-warning { margin-top: 4px; color: #fa8c16; font-size: 12px; line-height: 1.5; }
+
+  .input-wrap { position: relative; }
+  .input-wrap .count {
+    position: absolute;
+    right: 8px; top: 50%;
+    transform: translateY(-50%);
+    color: rgba(0,0,0,.35);
+    font-size: 12px;
+    pointer-events: none;
+  }
+
+  .checkbox-group { display: flex; flex-wrap: wrap; padding-top: 6px; }
+  .checkbox-group label {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin: 0 18px 8px 0;
+    min-width: 72px;
+    color: rgba(0,0,0,.85);
+    font-weight: normal;
+    cursor: pointer;
+  }
+  .checkbox-group.vertical { flex-direction: column; }
+  .checkbox-group.vertical label { margin-bottom: 10px; }
+
+  .link { color: #1890ff; text-decoration: none; cursor: pointer; margin-left: 8px; }
+  .link:hover { color: #40a9ff; }
+
+  .modal-footer {
+    padding: 12px 20px;
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- 侧边栏 -->
+  <aside class="sider" id="sider">
+    <div class="sider-logo">
+      <span class="logo-text">R862产品原型</span>
+      <button class="collapse-btn" id="collapseBtn" title="收起/展开菜单">◀</button>
+    </div>
+    <ul class="sider-menu">
+      <li class="menu-item active" data-title="GD-付款账户列表"><i class="mi-icon">💳</i><span class="mi-text">GD-付款账户列表</span></li>
+      <li class="menu-item" data-title="GD-客户退款"><i class="mi-icon">↩️</i><span class="mi-text">GD-客户退款</span></li>
+      <li class="menu-item" data-title="GCF-Payment"><i class="mi-icon">💰</i><span class="mi-text">GCF-Payment</span></li>
+      <li class="menu-item" data-title="GCF-Withdraw"><i class="mi-icon">🏧</i><span class="mi-text">GCF-Withdraw</span></li>
+    </ul>
+  </aside>
+
+  <!-- 右侧主区域 -->
+  <div class="main">
+
+    <!-- 头部 -->
+    <header class="header">
+      <span class="header-title" id="headerTitle">GD-付款账户列表</span>
+    </header>
+
+    <!-- 页签 -->
+    <div class="tabs">
+      <span class="tab">首页</span>
+      <span class="tab active" id="tabTitle">付款账户列表 <span style="color:#999;">×</span></span>
+    </div>
+
+<div class="page">
+
+  <!-- 筛选区 -->
+  <div class="filter-bar">
+    <div class="filter-item">
+      <label>账户名</label>
+      <select><option></option><option>公司账户</option><option>个人账户</option></select>
+      <input type="text" placeholder="">
+    </div>
+    <div class="filter-item">
+      <label>付款银行</label>
+      <select><option></option><option>中国银行</option><option>招商银行</option><option>南洋商业银行</option></select>
+      <input type="text" placeholder="">
+    </div>
+    <div class="filter-item">
+      <label>充值账户</label>
+      <select><option></option><option>AC056202 沈阳三共饲料有限公司</option><option>AC056253 企业(境内)</option></select>
+      <input type="text" placeholder="">
+    </div>
+    <div class="filter-item">
+      <label>状态</label>
+      <select><option></option><option>可用</option><option>待审核</option><option>停用</option></select>
+    </div>
+    <div class="filter-item">
+      <label>是否第三方支付</label>
+      <select><option></option><option>是</option><option>否</option></select>
+    </div>
+    <button class="btn btn-primary">🔍 查询</button>
+    <button class="btn">重置</button>
+  </div>
+
+  <!-- 表格卡片 -->
+  <div class="table-card">
+    <div class="table-toolbar">
+      <button class="btn btn-primary" id="addBtn">新增</button>
+    </div>
+
+    <table>
+      <colgroup>
+        <col style="width:10%"><col style="width:7%"><col style="width:7%">
+        <col style="width:11%"><col style="width:12%"><col style="width:5%">
+        <col style="width:6%"><col style="width:8%"><col style="width:5%">
+        <col style="width:6%"><col style="width:9%">
+      </colgroup>
+      <thead>
+        <tr>
+          <th>账户名称</th>
+          <th>银行</th>
+          <th>账号</th>
+          <th>币别/币种</th>
+          <th>充值账户</th>
+          <th>状态</th>
+          <th>是否支持线上充值</th>
+          <th>委托关系</th>
+          <th>鱼票到期</th>
+          <th>是否第三方支付</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>GOCOMKG INTERNATIONAL AL GROUP,HK LIMITED</td>
+          <td>中国银行</td>
+          <td>526511154765</td>
+          <td>EUR,RMB,USD</td>
+          <td>AC056238 GOCOMKG INTERNATIONAL GROUP (HK) LIMITED 香港企</td>
+          <td>可用</td>
+          <td>否</td>
+          <td>--</td>
+          <td>否</td>
+          <td>否</td>
+          <td class="actions"><a>详情</a><a>编辑</a><a class="danger">删除</a><a>日志</a></td>
+        </tr>
+        <tr>
+          <td>沈阳三共饲料畅益有限公司</td>
+          <td>澳门银行</td>
+          <td>123</td>
+          <td>USD,RMB</td>
+          <td>AC056202 沈阳三共饲料有限公司 中转仓</td>
+          <td>可用</td>
+          <td>否</td>
+          <td>--</td>
+          <td>否</td>
+          <td>否</td>
+          <td class="actions"><a>详情</a><a>编辑</a><a class="danger">删除</a><a>日志</a></td>
+        </tr>
+        <tr>
+          <td>Marine</td>
+          <td>澳门国际银行</td>
+          <td>234342</td>
+          <td>USD</td>
+          <td>AC056202 沈阳三共饲料有限公司 中转仓</td>
+          <td>可用</td>
+          <td>否</td>
+          <td>1.委托方为我方境内代理人</td>
+          <td>否</td>
+          <td>是</td>
+          <td class="actions"><a>详情</a><a>编辑</a><a class="danger">删除</a><a>日志</a></td>
+        </tr>
+        <tr>
+          <td>CIRRO</td>
+          <td>招商银行</td>
+          <td>23333</td>
+          <td>USD,SGD,EUR,GBP,CHF,AUD,JPY,CAD,KRW,NTHB</td>
+          <td>AC056253 企业(境内) 海外仓储中转仓</td>
+          <td>可用</td>
+          <td>否</td>
+          <td>1.委托方为我方指定中转人</td>
+          <td>否</td>
+          <td>是</td>
+          <td class="actions"><a>详情</a><a>编辑</a><a class="danger">删除</a><a>日志</a></td>
+        </tr>
+        <tr>
+          <td>沈阳三共饲料有限公司</td>
+          <td>南洋商业银行</td>
+          <td>5230712540223</td>
+          <td>EUR,USD,GBP,CAD,JPY,AUD</td>
+          <td>AC056202 沈阳三共饲料有限公司 中转仓</td>
+          <td>可用</td>
+          <td>否</td>
+          <td>--</td>
+          <td>否</td>
+          <td>否</td>
+          <td class="actions"><a>详情</a><a>编辑</a><a class="danger">删除</a><a>日志</a></td>
+        </tr>
+        <tr>
+          <td>沈阳三共饲料有限公司</td>
+          <td>南洋商业银行</td>
+          <td>602356102210</td>
+          <td>RMB</td>
+          <td>AC056202 沈阳三共饲料有限公司 中转仓</td>
+          <td>可用</td>
+          <td>否</td>
+          <td>--</td>
+          <td>否</td>
+          <td>否</td>
+          <td class="actions"><a>详情</a><a>编辑</a><a class="danger">删除</a><a>日志</a></td>
+        </tr>
+        <tr>
+          <td>沈阳三共饲料有限公司</td>
+          <td>其他银行</td>
+          <td>25633496732000</td>
+          <td>USD,EUR,GBP,AUD,JPY,CAD,BM</td>
+          <td>AC056202 沈阳三共饲料有限公司 中转仓</td>
+          <td>可用</td>
+          <td>否</td>
+          <td>--</td>
+          <td>否</td>
+          <td>否</td>
+          <td class="actions"><a>详情</a><a>编辑</a><a class="danger">删除</a><a>日志</a></td>
+        </tr>
+        <tr>
+          <td>沈阳三共饲料有限公司</td>
+          <td>招商银行</td>
+          <td>12345656</td>
+          <td>USD,EUR,GBP</td>
+          <td>AC056202 沈阳三共饲料有限公司 中转仓</td>
+          <td>可用</td>
+          <td>否</td>
+          <td>--</td>
+          <td>否</td>
+          <td>否</td>
+          <td class="actions"><a>详情</a><a>编辑</a><a class="danger">删除</a><a>日志</a></td>
+        </tr>
+        <tr>
+          <td>DJ杜鹃</td>
+          <td>支付宝</td>
+          <td>2013488411</td>
+          <td>USD</td>
+          <td>AC056253 企业(境内) 海外仓储中转仓</td>
+          <td>待审核</td>
+          <td>否</td>
+          <td>1.委托方为我方境内代理人</td>
+          <td>是</td>
+          <td>是</td>
+          <td class="actions"><a>详情</a><a>日志</a></td>
+        </tr>
+        <tr>
+          <td>215454</td>
+          <td>瑞银支付</td>
+          <td>54454545</td>
+          <td>EUR</td>
+          <td>AC056253 企业(境内) 海外仓储中转仓</td>
+          <td>待审核</td>
+          <td>否</td>
+          <td>1.委托方为我方境内代理人</td>
+          <td>是</td>
+          <td>是</td>
+          <td class="actions"><a>详情</a><a>日志</a></td>
+        </tr>
+        <tr>
+          <td>招银国有林可</td>
+          <td>银联</td>
+          <td>2125471</td>
+          <td>USD</td>
+          <td>AC056281 佛山市乐比旺义藏文瑞有限公司 境外仓储</td>
+          <td>待审核</td>
+          <td>否</td>
+          <td>1.委托方为我方境内代理人<br>2.委托方为我方指定收货人</td>
+          <td>是</td>
+          <td>是</td>
+          <td class="actions"><a>详情</a><a>日志</a></td>
+        </tr>
+        <tr>
+          <td>AC056281</td>
+          <td>可可</td>
+          <td>AC056281</td>
+          <td>USD</td>
+          <td>AC056281 佛山市乐比旺义藏文瑞有限公司 境外仓储</td>
+          <td>锁定</td>
+          <td>否</td>
+          <td>--</td>
+          <td>是</td>
+          <td>否</td>
+          <td class="actions"><a>详情</a><a>编辑</a><a class="danger">删除</a><a>日志</a></td>
+        </tr>
+        <tr>
+          <td>潮汕204av44</td>
+          <td>可可</td>
+          <td>testtsa123</td>
+          <td>USD,EUR</td>
+          <td>AC056205 蓝田 房产仓储</td>
+          <td>待审核</td>
+          <td>否</td>
+          <td>1.委托方为我方境内代理人</td>
+          <td>是</td>
+          <td>是</td>
+          <td class="actions"><a>详情</a><a>日志</a></td>
+        </tr>
+        <tr>
+          <td>54975489</td>
+          <td>陆金</td>
+          <td>AC056281</td>
+          <td>SGD,GBP,拭玩</td>
+          <td>AC056281 佛山市乐比旺义藏文瑞有限公司 境外仓储</td>
+          <td>待审核</td>
+          <td>否</td>
+          <td>1.委托方为我方境内代理人</td>
+          <td>是</td>
+          <td>是</td>
+          <td class="actions"><a>详情</a><a>编辑</a><a class="danger">删除</a><a>日志</a></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- 分页 -->
+    <div class="pagination">
+      <span>共 230 条</span>
+      <span class="pg-btn">«</span>
+      <span class="pg-btn active">1</span>
+      <span class="pg-btn">2</span>
+      <span class="pg-btn">›</span>
+      <select><option>200 条/页</option><option>50 条/页</option><option>100 条/页</option></select>
+      <span class="jump">跳至 <input type="text" value="1"> 页</span>
+    </div>
+  </div>
+
+  </div><!-- /.page -->
+  </div><!-- /.main -->
+</div><!-- /.layout -->
+
+<!-- 新增付款账户 弹窗 -->
+<div class="modal-mask" id="addModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">新增付款账户</span>
+      <button class="modal-close" id="modalClose" title="关闭">×</button>
+    </div>
+
+    <div class="modal-body">
+      <!-- 是否第三方平台 -->
+      <div class="form-item">
+        <label class="form-label"><span class="req">*</span>是否第三方平台：</label>
+        <div class="form-controls">
+          <select>
+            <option selected>否</option>
+            <option>是</option>
+          </select>
+          <div class="form-hint">使用第三方支付平台付款（例如：pingpong、P卡）。</div>
+        </div>
+      </div>
+
+      <!-- 银行名称 -->
+      <div class="form-item">
+        <label class="form-label"><span class="req">*</span>银行名称：</label>
+        <div class="form-controls">
+          <select>
+            <option selected>请选择</option>
+            <option>中国银行</option>
+            <option>招商银行</option>
+            <option>南洋商业银行</option>
+            <option>澳门国际银行</option>
+            <option>其他银行</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 账户名称 -->
+      <div class="form-item">
+        <label class="form-label"><span class="req">*</span>账户名称：</label>
+        <div class="form-controls">
+          <div class="input-wrap">
+            <input type="text" maxlength="255">
+            <span class="count">0/255</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 账号 -->
+      <div class="form-item">
+        <label class="form-label"><span class="req">*</span>账号：</label>
+        <div class="form-controls">
+          <div class="input-wrap">
+            <input type="text" maxlength="50">
+            <span class="count">0/50</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 开户行国家/地区 -->
+      <div class="form-item">
+        <label class="form-label"><span class="req">*</span>开户行国家/地区：</label>
+        <div class="form-controls">
+          <select>
+            <option selected>加拿大</option>
+            <option>中国</option>
+            <option>中国香港</option>
+            <option>美国</option>
+            <option>新加坡</option>
+          </select>
+          <div class="form-warning">加拿大当地付款时需要付款人提供收款人地址信息。此银行未来可能用于接收工资，因此需要提前提供。</div>
+        </div>
+      </div>
+
+      <!-- 开户行名称 -->
+      <div class="form-item">
+        <label class="form-label"><span class="req">*</span>开户行名称：</label>
+        <div class="form-controls">
+          <input type="text">
+        </div>
+      </div>
+
+      <!-- Swift Code -->
+      <div class="form-item">
+        <label class="form-label"><span class="req">*</span>Swift Code：</label>
+        <div class="form-controls">
+          <input type="text">
+        </div>
+      </div>
+
+      <!-- 地址-国家/地区 -->
+      <div class="form-item">
+        <label class="form-label"><span class="req">*</span>地址-国家/地区：</label>
+        <div class="form-controls">
+          <select>
+            <option selected>请选择</option>
+            <option>中国</option>
+            <option>加拿大</option>
+            <option>美国</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 地址-省/州 -->
+      <div class="form-item">
+        <label class="form-label"><span class="req">*</span>地址-省/州：</label>
+        <div class="form-controls">
+          <select>
+            <option selected>请选择</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 地址-城市名 -->
+      <div class="form-item">
+        <label class="form-label"><span class="req">*</span>地址-城市名：</label>
+        <div class="form-controls">
+          <div class="input-wrap">
+            <input type="text" maxlength="35">
+            <span class="count">0/35</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 地址-街道名 -->
+      <div class="form-item">
+        <label class="form-label"><span class="req">*</span>地址-街道名：</label>
+        <div class="form-controls">
+          <div class="input-wrap">
+            <input type="text" maxlength="70">
+            <span class="count">0/70</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 地址-建筑号 -->
+      <div class="form-item">
+        <label class="form-label"><span class="req">*</span>地址-建筑号：</label>
+        <div class="form-controls">
+          <div class="input-wrap">
+            <input type="text" maxlength="16">
+            <span class="count">0/16</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 地址-邮编 -->
+      <div class="form-item">
+        <label class="form-label"><span class="req">*</span>地址-邮编：</label>
+        <div class="form-controls">
+          <div class="input-wrap">
+            <input type="text" maxlength="16">
+            <span class="count">0/16</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 可充值币种 -->
+      <div class="form-item">
+        <label class="form-label"><span class="req">*</span>可充值币种：</label>
+        <div class="form-controls">
+          <div class="checkbox-group">
+            <label><input type="checkbox"> USD</label>
+            <label><input type="checkbox"> EUR</label>
+            <label><input type="checkbox"> GBP</label>
+            <label><input type="checkbox"> HKD</label>
+            <label><input type="checkbox"> AUD</label>
+            <label><input type="checkbox"> JPY</label>
+            <label><input type="checkbox"> CAD</label>
+            <label><input type="checkbox"> KRW</label>
+            <label><input type="checkbox"> THB</label>
+            <label><input type="checkbox"> TWD</label>
+            <label><input type="checkbox"> SGD</label>
+            <label><input type="checkbox"> RMB</label>
+            <label><input type="checkbox"> NZD</label>
+            <label><input type="checkbox"> TRY</label>
+            <label><input type="checkbox"> MXN</label>
+            <label><input type="checkbox"> AED</label>
+            <label><input type="checkbox"> VND</label>
+            <label><input type="checkbox"> ZCN</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 可充值账户 -->
+      <div class="form-item">
+        <label class="form-label"><span class="req">*</span>可充值账户：</label>
+        <div class="form-controls">
+          <div>
+            <a class="link" style="margin-left:0;">下载模板</a>
+          </div>
+          <div class="checkbox-group vertical" style="margin-top:10px;">
+            <label><input type="checkbox"> AC056202 沈阳三只羊网络运营有限公司 中转代发</label>
+            <label><input type="checkbox"> AC056278 香港 123</label>
+            <label><input type="checkbox"> AC056258 GOGOMG INTERNATIONAL GROUP (HK) LIMITED 海外仓储</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn" id="modalCancel">取消</button>
+      <button class="btn btn-primary" id="modalOk">确定</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  var sider = document.getElementById('sider');
+  var btn = document.getElementById('collapseBtn');
+  var headerTitle = document.getElementById('headerTitle');
+  var tabTitle = document.getElementById('tabTitle');
+
+  btn.addEventListener('click', function () {
+    var collapsed = sider.classList.toggle('collapsed');
+    btn.textContent = collapsed ? '▶' : '◀';
+    btn.title = collapsed ? '展开菜单' : '收起菜单';
+  });
+
+  document.querySelectorAll('.menu-item').forEach(function (item) {
+    item.addEventListener('click', function () {
+      document.querySelectorAll('.menu-item').forEach(function (i) { i.classList.remove('active'); });
+      item.classList.add('active');
+      var title = item.dataset.title;
+      headerTitle.textContent = title;
+      tabTitle.innerHTML = title + ' <span style="color:#999;">×</span>';
+    });
+  });
+
+  /* ===== 新增付款账户弹窗 ===== */
+  var addModal = document.getElementById('addModal');
+  document.getElementById('addBtn').addEventListener('click', function () {
+    addModal.classList.add('open');
+  });
+  document.getElementById('modalClose').addEventListener('click', function () {
+    addModal.classList.remove('open');
+  });
+  document.getElementById('modalCancel').addEventListener('click', function () {
+    addModal.classList.remove('open');
+  });
+  document.getElementById('modalOk').addEventListener('click', function () {
+    addModal.classList.remove('open');
+  });
+  addModal.addEventListener('click', function (e) {
+    if (e.target === addModal) addModal.classList.remove('open');
+  });
+
+  /* 字数统计 */
+  document.querySelectorAll('.input-wrap').forEach(function (wrap) {
+    var input = wrap.querySelector('input');
+    var count = wrap.querySelector('.count');
+    if (!input || !count) return;
+    var max = input.getAttribute('maxlength');
+    function update() { count.textContent = input.value.length + '/' + max; }
+    input.addEventListener('input', update);
+    update();
+  });
+</script>
+
+</body>
+</html>
