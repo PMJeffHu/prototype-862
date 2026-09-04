@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>客户退款-新增</title>
+<link rel="stylesheet" href="assets/common.css">
+<style>
+  /* ===== 表单卡片 ===== */
+  .form-card {
+    background: #fff;
+    border-radius: 2px;
+    padding: 20px 24px 24px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.03);
+    max-width: 1100px;
+  }
+
+  .form-item { display: flex; margin-bottom: 16px; }
+  .form-label {
+    flex: 0 0 130px;
+    padding-top: 6px;
+    text-align: right;
+    color: rgba(0,0,0,.85);
+  }
+  .form-label .req { color: #ff4d4f; margin-right: 2px; }
+  .form-controls { flex: 1; min-width: 0; margin-left: 10px; }
+
+  .form-controls select,
+  .form-controls input[type="text"] {
+    width: 100%;
+    height: 30px;
+    padding: 0 8px;
+    border: 1px solid #d9d9d9;
+    border-radius: 2px;
+    font-size: 13px;
+    color: rgba(0,0,0,.85);
+    outline: none;
+    background: #fff;
+  }
+  .form-controls select {
+    padding-right: 24px;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bfbfbf'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+  }
+  .form-controls select:hover, .form-controls input:hover, .form-controls textarea:hover { border-color: #40a9ff; }
+  .form-controls select:focus, .form-controls input:focus, .form-controls textarea:focus { border-color: #40a9ff; box-shadow: 0 0 0 2px rgba(24,144,255,.1); }
+
+  .form-controls textarea {
+    width: 100%;
+    min-height: 84px;
+    padding: 6px 8px;
+    border: 1px solid #d9d9d9;
+    border-radius: 2px;
+    font-size: 13px;
+    font-family: inherit;
+    color: rgba(0,0,0,.85);
+    outline: none;
+    resize: vertical;
+  }
+
+  /* ===== 币种余额卡片 ===== */
+  .balance-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+  .balance-card {
+    border: 1px solid #f0f0f0;
+    border-radius: 2px;
+    padding: 10px 14px;
+    background: #fff;
+  }
+  .balance-card .bc-head {
+    display: flex;
+    justify-content: space-between;
+    color: rgba(0,0,0,.85);
+    font-weight: 500;
+  }
+  .balance-card .bc-label { font-weight: normal; }
+  .balance-card .bc-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-top: 6px;
+  }
+  .balance-card .bc-row .name { color: rgba(0,0,0,.65); }
+  .balance-card .bc-row .amount { color: #fa8c16; }
+
+  /* ===== 文件上传按钮 ===== */
+  .upload-btn {
+    height: 30px;
+    padding: 0 14px;
+    border: 1px solid #1890ff;
+    border-radius: 2px;
+    background: #fff;
+    color: #1890ff;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .upload-btn:hover { color: #40a9ff; border-color: #40a9ff; }
+  .file-name { margin-left: 10px; color: rgba(0,0,0,.65); }
+
+  .input-wrap { position: relative; }
+  .input-wrap .count {
+    position: absolute;
+    right: 8px; bottom: 6px;
+    color: rgba(0,0,0,.35);
+    font-size: 12px;
+    pointer-events: none;
+  }
+
+  /* 金额行 */
+  .amount-row { display: flex; gap: 8px; }
+  .amount-row select { width: 140px; flex: 0 0 140px; }
+  .amount-row input { flex: 1; }
+
+  /* 协议 */
+  .agree { display: flex; align-items: center; gap: 6px; padding-top: 2px; }
+  .agree a { color: #1890ff; text-decoration: none; cursor: pointer; }
+  .agree a:hover { color: #40a9ff; }
+
+  /* 底部按钮 */
+  .form-footer {
+    margin-top: 24px;
+    padding-left: 140px;
+    display: flex;
+    gap: 8px;
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- 侧边栏（由 assets/app.js 渲染） -->
+  <aside class="sider" id="sider"></aside>
+
+  <!-- 右侧主区域 -->
+  <div class="main">
+
+    <header class="header" id="appHeader"></header>
+
+    <div class="tabs" id="appTabs"></div>
+
+    <!-- 主体内容容器：切换页面时仅替换这里 -->
+    <div id="appContent">
+    <div class="page">
+      <div class="form-card">
+
+        <!-- 退款主体 -->
+        <div class="form-item">
+          <label class="form-label"><span class="req">*</span>退款主体：</label>
+          <div class="form-controls">
+            <select>
+              <option selected>AC056202 沈阳三只羊网络运营有限公司 中转代发</option>
+              <option>AC056258 GOGOMG INTERNATIONAL GROUP (HK) LIMITED 海外仓储</option>
+              <option>AC056278 香港 123</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 各币种账户余额 -->
+        <div class="form-item">
+          <label class="form-label"></label>
+          <div class="form-controls">
+            <div class="balance-grid">
+              <div class="balance-card">
+                <div class="bc-head"><span class="bc-label">美元</span><span>USD</span></div>
+                <div class="bc-row"><span class="name">账户余额</span><span class="amount">206,651,371.111</span></div>
+              </div>
+              <div class="balance-card">
+                <div class="bc-head"><span class="bc-label">日元</span><span>JPY</span></div>
+                <div class="bc-row"><span class="name">账户余额</span><span class="amount">206,656,289.001</span></div>
+              </div>
+              <div class="balance-card">
+                <div class="bc-head"><span class="bc-label">津巴布韦货币在</span><span>ZCN</span></div>
+                <div class="bc-row"><span class="name">账户余额</span><span class="amount">206,656,400.001</span></div>
+              </div>
+              <div class="balance-card">
+                <div class="bc-head"><span class="bc-label">韩元</span><span>KRW</span></div>
+                <div class="bc-row"><span class="name">账户余额</span><span class="amount">206,656,400.001</span></div>
+              </div>
+              <div class="balance-card">
+                <div class="bc-head"><span class="bc-label">墨西哥比索</span><span>MXN</span></div>
+                <div class="bc-row"><span class="name">账户余额</span><span class="amount">206,656,400.001</span></div>
+              </div>
+              <div class="balance-card">
+                <div class="bc-head"><span class="bc-label">新加坡元</span><span>SGD</span></div>
+                <div class="bc-row"><span class="name">账户余额</span><span class="amount">206,656,400.001</span></div>
+              </div>
+              <div class="balance-card">
+                <div class="bc-head"><span class="bc-label">泰铢</span><span>THB</span></div>
+                <div class="bc-row"><span class="name">账户余额</span><span class="amount">206,656,400.001</span></div>
+              </div>
+              <div class="balance-card">
+                <div class="bc-head"><span class="bc-label">新西兰元</span><span>NZD</span></div>
+                <div class="bc-row"><span class="name">账户余额</span><span class="amount">206,656,400.001</span></div>
+              </div>
+              <div class="balance-card">
+                <div class="bc-head"><span class="bc-label">新台币元</span><span>TWD</span></div>
+                <div class="bc-row"><span class="name">账户余额</span><span class="amount">206,656,400.001</span></div>
+              </div>
+              <div class="balance-card">
+                <div class="bc-head"><span class="bc-label">越南盾</span><span>VND</span></div>
+                <div class="bc-row"><span class="name">账户余额</span><span class="amount">206,656,400.001</span></div>
+              </div>
+              <div class="balance-card">
+                <div class="bc-head"><span class="bc-label">土耳其里拉</span><span>TRY</span></div>
+                <div class="bc-row"><span class="name">账户余额</span><span class="amount">206,656,400.001</span></div>
+              </div>
+              <div class="balance-card">
+                <div class="bc-head"><span class="bc-label">阿联酋迪拉姆</span><span>AED</span></div>
+                <div class="bc-row"><span class="name">账户余额</span><span class="amount">206,656,400.001</span></div>
+              </div>
+              <div class="balance-card">
+                <div class="bc-head"><span class="bc-label">澳大利亚元</span><span>AUD</span></div>
+                <div class="bc-row"><span class="name">账户余额</span><span class="amount">206,656,400.001</span></div>
+              </div>
+              <div class="balance-card">
+                <div class="bc-head"><span class="bc-label">港币</span><span>HKD</span></div>
+                <div class="bc-row"><span class="name">账户余额</span><span class="amount">206,656,400.001</span></div>
+              </div>
+              <div class="balance-card">
+                <div class="bc-head"><span class="bc-label">英镑</span><span>GBP</span></div>
+                <div class="bc-row"><span class="name">账户余额</span><span class="amount">206,656,400.001</span></div>
+              </div>
+              <div class="balance-card">
+                <div class="bc-head"><span class="bc-label">加拿大元</span><span>CAD</span></div>
+                <div class="bc-row"><span class="name">账户余额</span><span class="amount">206,656,693.251</span></div>
+              </div>
+              <div class="balance-card">
+                <div class="bc-head"><span class="bc-label">欧元</span><span>EUR</span></div>
+                <div class="bc-row"><span class="name">账户余额</span><span class="amount">206,657,046.721</span></div>
+              </div>
+              <div class="balance-card">
+                <div class="bc-head"><span class="bc-label">人民币</span><span>RMB</span></div>
+                <div class="bc-row"><span class="name">账户余额</span><span class="amount">206,693,063.474</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 退款类型 -->
+        <div class="form-item">
+          <label class="form-label"><span class="req">*</span>退款类型：</label>
+          <div class="form-controls">
+            <select id="refundType">
+              <option>终止合作退款</option>
+              <option>打错款退款</option>
+              <option>变更主体后退款</option>
+              <option selected>押金退款</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 客户银行回单（打错款退款 / 押金退款 时显示） -->
+        <div class="form-item" id="receiptRow">
+          <label class="form-label"><span class="req">*</span>客户银行回单：</label>
+          <div class="form-controls">
+            <button class="upload-btn" id="uploadBtn" type="button">选择文件</button>
+            <input type="file" id="fileInput" hidden>
+            <span class="file-name" id="fileName"></span>
+          </div>
+        </div>
+
+        <!-- 退款事由 -->
+        <div class="form-item">
+          <label class="form-label"><span class="req">*</span>退款事由：</label>
+          <div class="form-controls">
+            <div class="input-wrap">
+              <textarea id="reasonInput" maxlength="200" placeholder="请输入退款事由"></textarea>
+              <span class="count" id="reasonCount">0/200</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 收款账户 -->
+        <div class="form-item">
+          <label class="form-label"><span class="req">*</span>收款账户：</label>
+          <div class="form-controls">
+            <select>
+              <option selected>请选择</option>
+              <option>AC056202 沈阳三只羊网络运营有限公司 中转代发</option>
+              <option>AC056278 香港 123</option>
+              <option>AC056258 GOGOMG INTERNATIONAL GROUP (HK) LIMITED 海外仓储</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 申请退款金额 -->
+        <div class="form-item">
+          <label class="form-label"><span class="req">*</span>申请退款金额：</label>
+          <div class="form-controls">
+            <div class="amount-row">
+              <select>
+                <option selected>请选择币种</option>
+                <option>USD</option><option>EUR</option><option>GBP</option>
+                <option>HKD</option><option>AUD</option><option>JPY</option>
+                <option>CAD</option><option>KRW</option><option>THB</option>
+                <option>TWD</option><option>SGD</option><option>RMB</option>
+                <option>NZD</option><option>TRY</option><option>MXN</option>
+                <option>AED</option><option>VND</option><option>ZCN</option>
+              </select>
+              <input type="text" placeholder="">
+            </div>
+          </div>
+        </div>
+
+        <!-- 免责声明 -->
+        <div class="form-item">
+          <label class="form-label"></label>
+          <div class="form-controls">
+            <div class="agree">
+              <input type="checkbox" id="agreeChk">
+              <label for="agreeChk">我已阅读并同意</label>
+              <a>《免责声明》</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- 底部按钮 -->
+        <div class="form-footer">
+          <button class="btn">取消</button>
+          <button class="btn btn-primary">提交</button>
+        </div>
+
+      </div>
+    </div>
+    </div><!-- /#appContent -->
+
+  </div><!-- /.main -->
+</div><!-- /.layout -->
+
+<script src="assets/app.js" data-page="refund"></script>
+<script>
+  /* 文件选择 */
+  var fileInput = document.getElementById('fileInput');
+  document.getElementById('uploadBtn').addEventListener('click', function () { fileInput.click(); });
+  fileInput.addEventListener('change', function () {
+    document.getElementById('fileName').textContent = fileInput.files.length ? fileInput.files[0].name : '';
+  });
+
+  /* 退款类型联动：打错款退款 / 押金退款 显示客户银行回单，其余隐藏 */
+  var refundType = document.getElementById('refundType');
+  var receiptRow = document.getElementById('receiptRow');
+
+  function syncReceiptRow() {
+    var show = (refundType.value === '打错款退款' || refundType.value === '押金退款');
+    receiptRow.style.display = show ? '' : 'none';
+    if (!show) {
+      fileInput.value = '';
+      document.getElementById('fileName').textContent = '';
+    }
+  }
+  refundType.addEventListener('change', syncReceiptRow);
+  syncReceiptRow();
+
+  /* 退款事由字数统计 */
+  var reason = document.getElementById('reasonInput');
+  reason.addEventListener('input', function () {
+    document.getElementById('reasonCount').textContent = reason.value.length + '/200';
+  });
+</script>
+
+</body>
+</html>

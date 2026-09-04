@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GCF-Withdraw</title>
+<link rel="stylesheet" href="assets/common.css">
+<style>
+  /* ===== 顶部 Deposit 概览条 ===== */
+  .wd-topbar {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 12px;
+    background: linear-gradient(90deg, #eef6ff 0%, #dbeafe 55%, #c7ddfb 100%);
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+  }
+  .wd-deposits { display: flex; gap: 8px; flex-wrap: wrap; }
+  .wd-deposit {
+    background: rgba(255,255,255,.85);
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 8px 12px;
+    min-width: 86px;
+    cursor: pointer;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .wd-deposit:hover { border-color: #93c5fd; }
+  .wd-deposit.active {
+    background: #fff;
+    border-color: #2563eb;
+    box-shadow: 0 2px 6px rgba(37,99,235,.18);
+  }
+
+  /* Balance 模式：选中卡片为蓝色文字样式（无白底边框） */
+  .bal-mode .wd-deposit.active {
+    background: rgba(255,255,255,.55);
+    border-color: transparent;
+    box-shadow: none;
+  }
+  .bal-mode .wd-deposit.active .wd-d-label,
+  .bal-mode .wd-deposit.active .wd-d-amount { color: #2563eb; }
+  .wd-deposit .wd-d-label {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    color: #2563eb;
+    font-size: 12px;
+  }
+  .wd-deposit .wd-d-amount {
+    margin-top: 4px;
+    font-size: 15px;
+    font-weight: 600;
+    color: rgba(0,0,0,.85);
+  }
+  .wd-deposit .wd-d-label .cur { font-weight: 600; }
+  .wd-account {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #2563eb;
+    font-size: 13px;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .wd-account .caret { font-size: 10px; color: #93c5fd; }
+
+  /* ===== 双栏面板 ===== */
+  .wd-panels {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    gap: 14px;
+    align-items: start;
+  }
+  @media (max-width: 1000px) { .wd-panels { grid-template-columns: 1fr; } }
+
+  .wd-panel {
+    background: #fff;
+    border-radius: 6px;
+    padding: 18px 20px 20px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.03);
+  }
+  .wd-panel-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: rgba(0,0,0,.9);
+  }
+
+  .wd-field { margin-bottom: 16px; }
+  .wd-field > .wd-label { display: block; margin-bottom: 6px; color: rgba(0,0,0,.85); }
+  .wd-label .req { color: #ef4444; margin-right: 3px; }
+  .wd-label .info {
+    display: inline-block;
+    width: 14px; height: 14px;
+    line-height: 13px;
+    text-align: center;
+    border: 1px solid #bfbfbf;
+    border-radius: 50%;
+    font-size: 10px;
+    color: #bfbfbf;
+    margin-left: 3px;
+    cursor: help;
+  }
+  .wd-field select,
+  .wd-field input[type="text"] {
+    width: 100%;
+    height: 34px;
+    padding: 0 10px;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    font-size: 13px;
+    color: rgba(0,0,0,.85);
+    outline: none;
+    background: #fff;
+  }
+  .wd-field select {
+    appearance: none;
+    padding-right: 30px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bfbfbf'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+  }
+  .wd-field textarea {
+    width: 100%;
+    min-height: 72px;
+    padding: 8px 10px;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: inherit;
+    color: rgba(0,0,0,.85);
+    outline: none;
+    resize: vertical;
+  }
+  .wd-field select:hover, .wd-field input:hover, .wd-field textarea:hover { border-color: #40a9ff; }
+  .wd-field select:focus, .wd-field input:focus, .wd-field textarea:focus { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,.12); }
+
+  /* 上传区 */
+  .wd-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    background: #fafafa;
+    padding: 28px 16px;
+    text-align: center;
+    color: rgba(0,0,0,.55);
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+  }
+  .wd-upload:hover, .wd-upload.dragover { border-color: #2563eb; background: #eff6ff; }
+  .wd-upload .up-icon {
+    width: 40px; height: 40px;
+    margin: 0 auto 10px;
+    border: 2px solid #2563eb;
+    border-radius: 8px;
+    position: relative;
+  }
+  .wd-upload .up-icon::after {
+    content: '↓';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #2563eb;
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .wd-upload .file-name { margin-top: 8px; color: #2563eb; word-break: break-all; }
+
+  /* ===== 接收账户 ===== */
+  .wd-account-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+  .wd-account-card .acc-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(0,0,0,.9);
+  }
+  .wd-account-card .acc-name .card-icon {
+    width: 22px; height: 16px;
+    border-radius: 3px;
+    background: linear-gradient(135deg, #93c5fd, #3b82f6);
+    display: inline-block;
+  }
+  .wd-account-card .acc-bank { margin-top: 8px; color: rgba(0,0,0,.6); font-size: 13px; }
+
+  .wd-sub-label { display: block; margin-bottom: 8px; color: rgba(0,0,0,.85); }
+
+  .wd-table-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    overflow-x: scroll;          /* 常驻横向滚动条 */
+    margin-bottom: 12px;
+  }
+  /* 滚动条样式 */
+  .wd-table-card::-webkit-scrollbar { height: 8px; }
+  .wd-table-card::-webkit-scrollbar-track { background: #f5f6f8; border-radius: 4px; }
+  .wd-table-card::-webkit-scrollbar-thumb { background: #c7cbd1; border-radius: 4px; }
+  .wd-table-card::-webkit-scrollbar-thumb:hover { background: #a8adb5; }
+  .wd-table { width: 100%; border-collapse: collapse; min-width: 660px; }
+  .wd-table th {
+    background: #f9fafb;
+    text-align: left;
+    font-weight: 500;
+    color: rgba(0,0,0,.75);
+    padding: 10px 12px;
+    border-bottom: 1px solid #e5e7eb;
+    white-space: nowrap;
+  }
+  .wd-table td {
+    padding: 11px 12px;
+    border-bottom: 1px solid #f0f0f0;
+    color: rgba(0,0,0,.8);
+    white-space: nowrap;
+  }
+  .wd-table tbody tr { cursor: pointer; }
+  .wd-table tbody tr:hover td { background: #f8fafc; }
+  .wd-table input[type="radio"] { accent-color: #2563eb; cursor: pointer; }
+  .wd-table .ellipsis { max-width: 130px; overflow: hidden; text-overflow: ellipsis; display: inline-block; vertical-align: bottom; }
+  .wd-table a { color: #2563eb; text-decoration: none; cursor: pointer; }
+  .wd-table a:hover { text-decoration: underline; }
+
+  .wd-add-link {
+    display: inline-block;
+    color: #2563eb;
+    font-size: 13px;
+    cursor: pointer;
+    margin-bottom: 16px;
+  }
+  .wd-add-link:hover { text-decoration: underline; }
+
+  /* 金额输入 */
+  .wd-amount { position: relative; }
+  .wd-amount input { padding-right: 52px !important; }
+  .wd-amount .unit {
+    position: absolute;
+    right: 12px; top: 50%;
+    transform: translateY(-50%);
+    color: rgba(0,0,0,.55);
+    font-size: 13px;
+    pointer-events: none;
+  }
+
+  /* 协议 */
+  .wd-agree { display: flex; align-items: center; gap: 6px; margin-bottom: 18px; }
+  .wd-agree input { accent-color: #2563eb; }
+  .wd-agree a { color: #2563eb; }
+  .wd-agree a:hover { text-decoration: underline; }
+
+  .wd-footer { display: flex; justify-content: flex-end; }
+  .wd-submit {
+    height: 34px;
+    padding: 0 26px;
+    background: #2563eb;
+    border: 1px solid #2563eb;
+    color: #fff;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .wd-submit:hover { background: #1d4ed8; }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- 侧边栏（由 assets/app.js 渲染） -->
+  <aside class="sider" id="sider"></aside>
+
+  <div class="main">
+
+    <header class="header" id="appHeader"></header>
+
+    <div class="tabs" id="appTabs"></div>
+
+    <div id="appContent">
+    <div class="page">
+
+      <!-- 顶部概览：Deposit 模式 -->
+      <div class="wd-topbar" id="topbarDeposit">
+        <div class="wd-deposits" id="depositTabs">
+          <div class="wd-deposit"><div class="wd-d-label"><span class="cur">JPY Deposit</span></div><div class="wd-d-amount">9,997.00</div></div>
+          <div class="wd-deposit"><div class="wd-d-label"><span class="cur">GBP Deposit</span></div><div class="wd-d-amount">9,999.00</div></div>
+          <div class="wd-deposit"><div class="wd-d-label"><span class="cur">EUR Deposit</span></div><div class="wd-d-amount">9,999.00</div></div>
+          <div class="wd-deposit"><div class="wd-d-label"><span class="cur">HKD Deposit</span></div><div class="wd-d-amount">9,999.00</div></div>
+          <div class="wd-deposit"><div class="wd-d-label"><span class="cur">ZCN Deposit</span></div><div class="wd-d-amount">9,999.00</div></div>
+          <div class="wd-deposit active"><div class="wd-d-label"><span class="cur">USD Deposit</span></div><div class="wd-d-amount">10,200.36</div></div>
+        </div>
+        <div class="wd-account" id="accountSwitch">Account ID：ACEL12201 <span class="info">i</span> <span class="caret">▼</span></div>
+      </div>
+
+      <!-- 顶部概览：Balance 模式（默认隐藏） -->
+      <div class="wd-topbar bal-mode" id="topbarBalance" style="display:none;">
+        <div class="wd-deposits" id="balanceTabs">
+          <div class="wd-deposit active"><div class="wd-d-label"><span class="cur">USD Balance</span></div><div class="wd-d-amount">223,337,033.23</div></div>
+          <div class="wd-deposit"><div class="wd-d-label"><span class="cur">GBP Balance</span></div><div class="wd-d-amount">999,930,122.41</div></div>
+          <div class="wd-deposit"><div class="wd-d-label"><span class="cur">EUR Balance</span></div><div class="wd-d-amount">999,956,950.62</div></div>
+          <div class="wd-deposit"><div class="wd-d-label"><span class="cur">JPY Balance</span></div><div class="wd-d-amount">999,999,999.00</div></div>
+          <div class="wd-deposit"><div class="wd-d-label"><span class="cur">HKD Balance</span></div><div class="wd-d-amount">999,999,999.00</div></div>
+          <div class="wd-deposit"><div class="wd-d-label"><span class="cur">ZCN Balance</span></div><div class="wd-d-amount">999,999,999.00</div></div>
+        </div>
+        <div class="wd-account">Account ID：ACEL12201 <span class="info">i</span> <span class="caret">▼</span></div>
+      </div>
+
+      <div class="wd-panels">
+        <!-- 左栏：提现信息 -->
+        <div class="wd-panel">
+          <div class="wd-panel-title">Withdraw Information</div>
+
+          <div class="wd-field">
+            <label class="wd-label"><span class="req">*</span>Withdraw Type</label>
+            <select id="withdrawType">
+              <option selected>Deposit</option>
+              <option>Balance</option>
+            </select>
+          </div>
+
+          <div class="wd-field">
+            <label class="wd-label"><span class="req">*</span>Withdraw Reason</label>
+            <select>
+              <option selected>Please select</option>
+              <option>Supplier payment</option>
+              <option>Expense reimbursement</option>
+              <option>Other</option>
+            </select>
+          </div>
+
+          <div class="wd-field">
+            <label class="wd-label"><span class="req">*</span>Withdraw Details</label>
+            <textarea></textarea>
+          </div>
+
+          <div class="wd-field" id="proofField">
+            <label class="wd-label"><span class="req">*</span>Proof of Deposit<span class="info">i</span></label>
+            <div class="wd-upload" id="uploadArea">
+              <div class="up-icon"></div>
+              <div>Click or drag file to this area to upload</div>
+              <div class="file-name" id="uploadFileName"></div>
+            </div>
+            <input type="file" id="fileInput" hidden>
+          </div>
+        </div>
+
+        <!-- 右栏：接收账户 -->
+        <div class="wd-panel">
+          <div class="wd-panel-title">Receiving Account</div>
+
+          <div class="wd-account-card">
+            <div class="acc-name"><span class="card-icon"></span>ACEL12201 zongteng</div>
+            <div class="acc-bank">BANK OF GANZHOU CO.,LTD</div>
+          </div>
+
+          <label class="wd-sub-label"><span class="req">*</span>Select Receiving Account</label>
+          <div class="wd-table-card">
+            <table class="wd-table">
+              <thead>
+                <tr>
+                  <th style="width:36px"></th>
+                  <th>Bank Name</th>
+                  <th>Account Name</th>
+                  <th>Bank Account#</th>
+                  <th>Currency</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="recvBody">
+                <tr>
+                  <td><input type="radio" name="recvAcc" checked></td>
+                  <td><span class="ellipsis">BANK OF GANZHOU ...</span></td>
+                  <td>ACEL12201 zongteng</td>
+                  <td>--</td>
+                  <td>USD, EUR, HKD, GBP, ...</td>
+                  <td><a>Edit</a></td>
+                </tr>
+                <tr>
+                  <td><input type="radio" name="recvAcc"></td>
+                  <td><span class="ellipsis">AGRICULTURAL BAN ...</span></td>
+                  <td>zongteng</td>
+                  <td>1523865402</td>
+                  <td>USD, CNY</td>
+                  <td><a>Edit</a></td>
+                </tr>
+                <tr>
+                  <td><input type="radio" name="recvAcc"></td>
+                  <td><span class="ellipsis">CHINA DEVELOPME ...</span></td>
+                  <td>zongteng</td>
+                  <td>--</td>
+                  <td>GBP, HKD, EUR, USD</td>
+                  <td><a>Edit</a></td>
+                </tr>
+                <tr>
+                  <td><input type="radio" name="recvAcc"></td>
+                  <td><span class="ellipsis">Bank of Quanzhou Co ...</span></td>
+                  <td>zongteng</td>
+                  <td>--</td>
+                  <td>USD, EUR, GBP, HKD</td>
+                  <td><a>Edit</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <a class="wd-add-link">+ Add New Payment Account</a>
+
+          <div class="wd-field">
+            <label class="wd-label"><span class="req">*</span>Received Amount</label>
+            <div class="wd-amount">
+              <input type="text" id="amountInput">
+              <span class="unit" id="amountUnit">USD</span>
+            </div>
+          </div>
+
+          <div class="wd-agree">
+            <input type="checkbox" id="agreeChk">
+            <label for="agreeChk"><span class="req">*</span> Noted and Agree：</label>
+            <a>《Disclaimer》</a>
+          </div>
+
+          <div class="wd-footer">
+            <button class="wd-submit" id="submitBtn">Submit</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    </div><!-- /#appContent -->
+
+  </div><!-- /.main -->
+</div><!-- /.layout -->
+
+<script src="assets/app.js" data-page="withdraw"></script>
+<script>
+  /* ===== Withdraw Type 切换：Deposit / Balance ===== */
+  var withdrawType = document.getElementById('withdrawType');
+  var topbarDeposit = document.getElementById('topbarDeposit');
+  var topbarBalance = document.getElementById('topbarBalance');
+  var proofField = document.getElementById('proofField');
+
+  function syncWithdrawType() {
+    var isBalance = withdrawType.value === 'Balance';
+    topbarDeposit.style.display = isBalance ? 'none' : '';
+    topbarBalance.style.display = isBalance ? '' : 'none';
+    proofField.style.display = isBalance ? 'none' : '';
+    syncAmountUnit();
+  }
+  withdrawType.addEventListener('change', syncWithdrawType);
+  syncWithdrawType();
+
+  /* 币种卡片切换（两种模式通用） */
+  var amountUnit = document.getElementById('amountUnit');
+  function bindDepositTabs(containerId) {
+    var cards = document.querySelectorAll('#' + containerId + ' .wd-deposit');
+    cards.forEach(function (card) {
+      card.addEventListener('click', function () {
+        cards.forEach(function (c) { c.classList.remove('active'); });
+        card.classList.add('active');
+        syncAmountUnit();
+      });
+    });
+  }
+  bindDepositTabs('depositTabs');
+  bindDepositTabs('balanceTabs');
+
+  function syncAmountUnit() {
+    var isBalance = withdrawType.value === 'Balance';
+    var active = document.querySelector(
+      '#' + (isBalance ? 'balanceTabs' : 'depositTabs') + ' .wd-deposit.active .cur'
+    );
+    if (active) amountUnit.textContent = active.textContent.split(' ')[0];
+  }
+
+  /* 接收账户单选：点行即选中 */
+  var recvRows = document.querySelectorAll('#recvBody tr');
+  recvRows.forEach(function (tr) {
+    tr.addEventListener('click', function (e) {
+      if (e.target.tagName === 'A') return;
+      var radio = tr.querySelector('input[type="radio"]');
+      if (radio) radio.checked = true;
+    });
+  });
+
+  /* 文件上传 */
+  var uploadArea = document.getElementById('uploadArea');
+  var fileInput = document.getElementById('fileInput');
+  var fileNameEl = document.getElementById('uploadFileName');
+
+  uploadArea.addEventListener('click', function () { fileInput.click(); });
+  fileInput.addEventListener('change', function () {
+    fileNameEl.textContent = fileInput.files.length ? '已选择：' + fileInput.files[0].name : '';
+  });
+  ['dragover', 'dragenter'].forEach(function (ev) {
+    uploadArea.addEventListener(ev, function (e) {
+      e.preventDefault();
+      uploadArea.classList.add('dragover');
+    });
+  });
+  ['dragleave', 'drop'].forEach(function (ev) {
+    uploadArea.addEventListener(ev, function (e) {
+      e.preventDefault();
+      uploadArea.classList.remove('dragover');
+      if (ev === 'drop' && e.dataTransfer.files.length) {
+        fileNameEl.textContent = '已选择：' + e.dataTransfer.files[0].name;
+      }
+    });
+  });
+
+  /* Submit（原型占位） */
+  document.getElementById('submitBtn').addEventListener('click', function () { /* TODO: 提交校验 */ });
+</script>
+
+</body>
+</html>

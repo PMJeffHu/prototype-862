@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GCF-Payment</title>
+<link rel="stylesheet" href="assets/common.css">
+<style>
+  /* ===== GCF-Payment 页面样式 ===== */
+  .gcf-card {
+    background: #fff;
+    border-radius: 2px;
+    padding: 20px 20px 16px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.03);
+    margin-bottom: 12px;
+  }
+
+  .gcf-filters {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px 24px;
+  }
+  .gcf-field label {
+    display: block;
+    margin-bottom: 6px;
+    color: rgba(0,0,0,.75);
+    font-size: 13px;
+  }
+  .gcf-field .gcf-control { position: relative; }
+  .gcf-field input[type="text"],
+  .gcf-field select {
+    width: 100%;
+    height: 34px;
+    padding: 0 30px 0 10px;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    font-size: 13px;
+    color: rgba(0,0,0,.85);
+    outline: none;
+    background: #fff;
+  }
+  .gcf-field select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bfbfbf'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+  }
+  .gcf-field input:hover, .gcf-field select:hover { border-color: #40a9ff; }
+  .gcf-field input:focus, .gcf-field select:focus { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,.12); }
+
+  .gcf-field .gcf-suffix {
+    position: absolute;
+    right: 8px; top: 50%;
+    transform: translateY(-50%);
+    color: #bfbfbf;
+    font-size: 12px;
+    pointer-events: none;
+  }
+
+  .gcf-actions { margin-top: 14px; display: flex; gap: 10px; }
+  .gcf-btn-search {
+    height: 34px;
+    padding: 0 18px;
+    background: #2563eb;
+    border: 1px solid #2563eb;
+    color: #fff;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .gcf-btn-search:hover { background: #1d4ed8; }
+  .gcf-btn-reset {
+    height: 34px;
+    padding: 0 18px;
+    background: #fff;
+    border: 1px solid #d9d9d9;
+    color: rgba(0,0,0,.75);
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .gcf-btn-reset:hover { border-color: #2563eb; color: #2563eb; }
+
+  .gcf-add {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 34px;
+    padding: 0 14px;
+    background: #fff;
+    border: 1px solid #2563eb;
+    color: #2563eb;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    margin-bottom: 12px;
+  }
+  .gcf-add:hover { background: #eff6ff; }
+  .gcf-add .plus { font-size: 15px; line-height: 1; }
+
+  /* ===== 表格 ===== */
+  .gcf-table-card {
+    background: #fff;
+    border-radius: 2px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.03);
+    overflow-x: auto;
+  }
+  .gcf-table { width: 100%; border-collapse: collapse; min-width: 1080px; }
+  .gcf-table th {
+    text-align: left;
+    font-weight: 600;
+    color: rgba(0,0,0,.85);
+    padding: 12px 14px;
+    border-bottom: 1px solid #e5e7eb;
+    white-space: nowrap;
+    background: #fff;
+  }
+  .gcf-table th .info {
+    display: inline-block;
+    width: 14px; height: 14px;
+    line-height: 14px;
+    text-align: center;
+    border: 1px solid #bfbfbf;
+    border-radius: 50%;
+    font-size: 10px;
+    color: #bfbfbf;
+    margin-left: 4px;
+    cursor: help;
+  }
+  .gcf-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #f0f0f0;
+    color: rgba(0,0,0,.75);
+    vertical-align: top;
+    word-break: break-all;
+  }
+  .gcf-table tbody tr:hover td { background: #f8fafc; }
+  .gcf-table .cell-strong { color: rgba(0,0,0,.85); }
+
+  .gcf-actions-cell { white-space: nowrap; }
+  .gcf-actions-cell a { color: #2563eb; text-decoration: none; cursor: pointer; margin-right: 12px; }
+  .gcf-actions-cell a:hover { color: #1d4ed8; text-decoration: underline; }
+  .gcf-actions-cell a.danger { color: #ef4444; }
+  .gcf-actions-cell a.danger:hover { color: #dc2626; }
+
+  /* ===== Add New 弹窗 ===== */
+  .gcf-modal-mask {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.45);
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    overflow-y: auto;
+    z-index: 1000;
+    padding: 32px 16px;
+  }
+  .gcf-modal-mask.open { display: flex; }
+
+  .gcf-modal {
+    width: 760px;
+    max-width: 100%;
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.18);
+  }
+  .gcf-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 16px 20px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .gcf-modal-header .gcf-modal-title { font-size: 15px; font-weight: 600; }
+  .gcf-modal-close {
+    position: absolute;
+    right: 14px; top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    font-size: 18px;
+    color: rgba(0,0,0,.45);
+    cursor: pointer;
+    width: 28px; height: 28px;
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .gcf-modal-close:hover { background: #f0f0f0; color: rgba(0,0,0,.85); }
+
+  .gcf-modal-body { padding: 20px 28px 4px; max-height: 66vh; overflow-y: auto; }
+
+  .gcf-form-item { display: flex; margin-bottom: 14px; }
+  .gcf-form-label {
+    flex: 0 0 190px;
+    padding-top: 7px;
+    text-align: right;
+    color: rgba(0,0,0,.85);
+  }
+  .gcf-form-label .req { color: #ef4444; margin-right: 2px; }
+  .gcf-form-label .info {
+    display: inline-block;
+    width: 14px; height: 14px;
+    line-height: 13px;
+    text-align: center;
+    border: 1px solid #bfbfbf;
+    border-radius: 50%;
+    font-size: 10px;
+    color: #bfbfbf;
+    margin-left: 3px;
+    cursor: help;
+  }
+  .gcf-form-controls { flex: 1; min-width: 0; margin-left: 12px; }
+
+  .gcf-form-controls input[type="text"],
+  .gcf-form-controls select {
+    width: 100%;
+    height: 34px;
+    padding: 0 10px;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    font-size: 13px;
+    color: rgba(0,0,0,.85);
+    outline: none;
+    background: #fff;
+  }
+  .gcf-form-controls select {
+    padding-right: 30px;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bfbfbf'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+  }
+  .gcf-form-controls input:hover, .gcf-form-controls select:hover { border-color: #40a9ff; }
+  .gcf-form-controls input:focus, .gcf-form-controls select:focus { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,.12); }
+
+  .gcf-notice {
+    margin-top: 6px;
+    color: #f59e0b;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  .gcf-check-group { display: flex; flex-wrap: wrap; padding-top: 6px; }
+  .gcf-check-group label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 10px 0;
+    width: 25%;
+    min-width: 90px;
+    color: rgba(0,0,0,.85);
+    cursor: pointer;
+  }
+  .gcf-check-group.vertical { flex-direction: column; }
+  .gcf-check-group.vertical label { width: 100%; margin-bottom: 10px; }
+
+  .gcf-modal-footer {
+    padding: 14px 20px;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+  }
+  .gcf-btn-cancel {
+    height: 34px;
+    padding: 0 22px;
+    background: #fff;
+    border: 1px solid #d9d9d9;
+    color: rgba(0,0,0,.75);
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .gcf-btn-cancel:hover { border-color: #2563eb; color: #2563eb; }
+  .gcf-btn-confirm {
+    height: 34px;
+    padding: 0 22px;
+    background: #2563eb;
+    border: 1px solid #2563eb;
+    color: #fff;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .gcf-btn-confirm:hover { background: #1d4ed8; }
+
+  /* ===== Edit 弹窗 ===== */
+  .gcf-modal.edit-modal { width: 760px; }
+  .gcf-form-controls input[readonly],
+  .gcf-form-controls input[disabled],
+  .gcf-form-controls select[disabled] {
+    background: #f5f5f5;
+    color: rgba(0,0,0,.45);
+    cursor: not-allowed;
+  }
+  .gcf-form-controls input[disabled] { padding-right: 10px; }
+
+  .gcf-radio-group { padding-top: 6px; }
+  .gcf-radio-group.locked { opacity: .55; }
+  .gcf-radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    color: rgba(0,0,0,.85);
+    cursor: pointer;
+  }
+  .gcf-radio-group input { accent-color: #2563eb; }
+
+  .gcf-modal-footer.center { justify-content: center; }
+
+  /* ===== Detail 弹窗 ===== */
+  .dtl-section {
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .dtl-section-head {
+    background: #f3f4f6;
+    padding: 10px 16px;
+    font-weight: 600;
+    color: rgba(0,0,0,.85);
+  }
+  .dtl-section-head .info {
+    display: inline-block;
+    width: 14px; height: 14px;
+    line-height: 13px;
+    text-align: center;
+    border: 1px solid #bfbfbf;
+    border-radius: 50%;
+    font-size: 10px;
+    color: #bfbfbf;
+    margin-left: 4px;
+    cursor: help;
+  }
+  .dtl-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px 24px;
+    padding: 16px;
+  }
+  .dtl-item { display: flex; align-items: baseline; }
+  .dtl-item .dtl-label {
+    flex: 0 0 44%;
+    color: rgba(0,0,0,.55);
+    white-space: nowrap;
+  }
+  .dtl-item .dtl-value {
+    flex: 1;
+    color: rgba(0,0,0,.85);
+    word-break: break-all;
+  }
+  .dtl-item .dtl-value a { color: #2563eb; text-decoration: none; cursor: pointer; }
+  .dtl-item .dtl-value a:hover { text-decoration: underline; }
+  .dtl-item.tall { align-items: flex-start; }
+  .dtl-item.tall .dtl-value { line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- 侧边栏（由 assets/app.js 渲染） -->
+  <aside class="sider" id="sider"></aside>
+
+  <div class="main">
+
+    <header class="header" id="appHeader"></header>
+
+    <div class="tabs" id="appTabs"></div>
+
+    <div id="appContent">
+    <div class="page">
+
+      <!-- 筛选区 -->
+      <div class="gcf-card">
+        <div class="gcf-filters">
+          <div class="gcf-field">
+            <label>Account Name</label>
+            <div class="gcf-control">
+              <input type="text" id="fName" placeholder="Account Name">
+              <span class="gcf-suffix">☰</span>
+            </div>
+          </div>
+          <div class="gcf-field">
+            <label>AccountID</label>
+            <div class="gcf-control">
+              <select id="fAccountId">
+                <option>All</option>
+                <option>ACEL12215 UI/UEdev1</option>
+                <option>ACEL12201 zongteng</option>
+              </select>
+            </div>
+          </div>
+          <div class="gcf-field">
+            <label>Status</label>
+            <div class="gcf-control">
+              <select id="fStatus">
+                <option>All</option>
+                <option>Available</option>
+                <option>Verifying</option>
+              </select>
+            </div>
+          </div>
+          <div class="gcf-field">
+            <label>Currency</label>
+            <div class="gcf-control">
+              <select id="fCurrency">
+                <option>All</option>
+                <option>USD</option><option>EUR</option><option>HKD</option>
+                <option>GBP</option><option>JPY</option><option>RMB</option>
+                <option>ZCN</option>
+              </select>
+            </div>
+          </div>
+          <div class="gcf-field">
+            <label>Third-party Payment</label>
+            <div class="gcf-control">
+              <select id="fThird">
+                <option>All</option>
+                <option>Yes</option>
+                <option>No</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="gcf-actions">
+          <button class="gcf-btn-search" id="searchBtn">Search</button>
+          <button class="gcf-btn-reset" id="resetBtn">Reset</button>
+        </div>
+      </div>
+
+      <!-- 新增按钮 -->
+      <button class="gcf-add" id="addNewBtn"><span class="plus">+</span> Add New</button>
+
+      <!-- 列表 -->
+      <div class="gcf-table-card">
+        <table class="gcf-table">
+          <thead>
+            <tr>
+              <th style="width:12%">Account Name</th>
+              <th style="width:7%">Status</th>
+              <th style="width:13%">Bank Name</th>
+              <th style="width:9%">Bank Account#</th>
+              <th style="width:8%">Currency</th>
+              <th style="width:10%">AccountID</th>
+              <th style="width:12%">Entrustment Relationship<span class="info">i</span></th>
+              <th style="width:9%">Payment Type<span class="info">i</span></th>
+              <th style="width:9%">Third-party Payment<span class="info">i</span></th>
+              <th style="width:7%">Disclaimer</th>
+              <th style="width:9%">Action</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr>
+              <td class="cell-strong">ACEL12215 UI/UEdev1</td>
+              <td>Available</td>
+              <td>BANK OF JIAXING CO.,LTD</td>
+              <td>--</td>
+              <td>USD/ZCN</td>
+              <td>ACEL12215 UI/UEdev1</td>
+              <td>1.Trustee is our legal representative</td>
+              <td>Bank</td>
+              <td>Yes</td>
+              <td>No</td>
+              <td class="gcf-actions-cell"><a>Detail</a><a>Edit</a><a class="danger">Delete</a></td>
+            </tr>
+            <tr>
+              <td class="cell-strong">ACEL12201 zongteng</td>
+              <td>Available</td>
+              <td>BANK OF GANZHOU CO.,LTD</td>
+              <td>--</td>
+              <td>USD/EUR/HKD/GBP/JPY/ZCN</td>
+              <td>ACEL12201 zongteng</td>
+              <td>1.Trustee is our legal representative</td>
+              <td>Bank</td>
+              <td>Yes</td>
+              <td>No</td>
+              <td class="gcf-actions-cell"><a>Detail</a><a>Edit</a><a class="danger">Delete</a></td>
+            </tr>
+            <tr>
+              <td class="cell-strong">zongteng</td>
+              <td>Available</td>
+              <td>AGRICULTURAL BANK OF CHINA LIMITED</td>
+              <td>11111233311312</td>
+              <td>JPY</td>
+              <td>ACEL12201 zongteng</td>
+              <td>--</td>
+              <td>Bank</td>
+              <td>No</td>
+              <td>No</td>
+              <td class="gcf-actions-cell"><a>Detail</a><a>Edit</a><a class="danger">Delete</a></td>
+            </tr>
+            <tr>
+              <td class="cell-strong">zongteng</td>
+              <td>Available</td>
+              <td>AGRICULTURAL BANK OF CHINA LIMITED</td>
+              <td>1523865402</td>
+              <td>USD/RMB</td>
+              <td>ACEL12201 zongteng</td>
+              <td>--</td>
+              <td>Bank</td>
+              <td>No</td>
+              <td>No</td>
+              <td class="gcf-actions-cell"><a>Detail</a><a>Edit</a><a class="danger">Delete</a></td>
+            </tr>
+            <tr>
+              <td class="cell-strong">?</td>
+              <td>Verifying</td>
+              <td>BANK OF CHENGDU CO., LTD</td>
+              <td>--</td>
+              <td>USD</td>
+              <td>ACEL12201 zongteng</td>
+              <td>1.Trustee is our legal representative</td>
+              <td>Bank</td>
+              <td>Yes</td>
+              <td>No</td>
+              <td class="gcf-actions-cell"><a>Detail</a></td>
+            </tr>
+            <tr>
+              <td class="cell-strong">zongteng</td>
+              <td>Available</td>
+              <td>CHINA DEVELOPMENT BANK</td>
+              <td>--</td>
+              <td>GBP/HKD/EUR/USD</td>
+              <td>ACEL12201 zongteng</td>
+              <td>--</td>
+              <td>Bank</td>
+              <td>No</td>
+              <td>No</td>
+              <td class="gcf-actions-cell"><a>Detail</a><a>Edit</a><a class="danger">Delete</a></td>
+            </tr>
+            <tr>
+              <td class="cell-strong">zongteng</td>
+              <td>Available</td>
+              <td>Bank of Quanzhou Co.,Ltd.</td>
+              <td>--</td>
+              <td>USD/EUR/GBP/HKD</td>
+              <td>ACEL12201 zongteng</td>
+              <td>--</td>
+              <td>Bank</td>
+              <td>No</td>
+              <td>No</td>
+              <td class="gcf-actions-cell"><a>Detail</a><a>Edit</a><a class="danger">Delete</a></td>
+            </tr>
+            <tr>
+              <td class="cell-strong">zongteng</td>
+              <td>Available</td>
+              <td>CHANG AN BANK CO.,LTD</td>
+              <td>--</td>
+              <td>USD/EUR/GBP/HKD</td>
+              <td>ACEL12201 zongteng</td>
+              <td>--</td>
+              <td>Bank</td>
+              <td>No</td>
+              <td>No</td>
+              <td class="gcf-actions-cell"><a>Detail</a><a>Edit</a><a class="danger">Delete</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Add New 弹窗（放在 .page 内，随页面切换一起注入） -->
+      <div class="gcf-modal-mask" id="addPaymentModal">
+        <div class="gcf-modal">
+          <div class="gcf-modal-header">
+            <span class="gcf-modal-title">Add New Payment Account</span>
+            <button class="gcf-modal-close" id="modalCloseBtn" title="Close">×</button>
+          </div>
+
+          <div class="gcf-modal-body">
+            <!-- Payment Type -->
+            <div class="gcf-form-item">
+              <label class="gcf-form-label"><span class="req">*</span>Payment Type：</label>
+              <div class="gcf-form-controls">
+                <select>
+                  <option selected>Bank</option>
+                  <option>Third-party</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Bank Name -->
+            <div class="gcf-form-item">
+              <label class="gcf-form-label"><span class="req">*</span>Bank Name<span class="info">i</span>：</label>
+              <div class="gcf-form-controls">
+                <select>
+                  <option selected></option>
+                  <option>BANK OF JIAXING CO.,LTD</option>
+                  <option>BANK OF GANZHOU CO.,LTD</option>
+                  <option>AGRICULTURAL BANK OF CHINA LIMITED</option>
+                  <option>BANK OF CHENGDU CO., LTD</option>
+                  <option>CHINA DEVELOPMENT BANK</option>
+                  <option>Bank of Quanzhou Co.,Ltd.</option>
+                  <option>CHANG AN BANK CO.,LTD</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Account Name -->
+            <div class="gcf-form-item">
+              <label class="gcf-form-label"><span class="req">*</span>Account Name：</label>
+              <div class="gcf-form-controls">
+                <input type="text">
+              </div>
+            </div>
+
+            <!-- Bank Account# -->
+            <div class="gcf-form-item">
+              <label class="gcf-form-label">Bank Account#：</label>
+              <div class="gcf-form-controls">
+                <input type="text">
+              </div>
+            </div>
+
+            <!-- Country/Region of Account -->
+            <div class="gcf-form-item">
+              <label class="gcf-form-label"><span class="req">*</span>Country/Region of Account：</label>
+              <div class="gcf-form-controls">
+                <select id="acctCountry">
+                  <option selected>CA[Canada]</option>
+                  <option>CN[China]</option>
+                  <option>HK[Hong Kong]</option>
+                  <option>US[United States]</option>
+                  <option>SG[Singapore]</option>
+                </select>
+                <div class="gcf-notice" id="countryNotice">
+                  Notice :For domestic transactions within Canada, it is required that the payer provides the payee's address details. This information is essential as the bank account may be used for future refunds and thus should be submitted beforehand.
+                </div>
+              </div>
+            </div>
+
+            <!-- Swift Code -->
+            <div class="gcf-form-item">
+              <label class="gcf-form-label"><span class="req">*</span>Swift Code：</label>
+              <div class="gcf-form-controls">
+                <input type="text">
+              </div>
+            </div>
+
+            <!-- Address - Country/Region -->
+            <div class="gcf-form-item">
+              <label class="gcf-form-label"><span class="req">*</span>Address - Country/Region：</label>
+              <div class="gcf-form-controls">
+                <select>
+                  <option selected></option>
+                  <option>CA[Canada]</option>
+                  <option>CN[China]</option>
+                  <option>HK[Hong Kong]</option>
+                  <option>US[United States]</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Address - Province/State -->
+            <div class="gcf-form-item">
+              <label class="gcf-form-label"><span class="req">*</span>Address - Province/State：</label>
+              <div class="gcf-form-controls">
+                <select>
+                  <option selected></option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Address-City -->
+            <div class="gcf-form-item">
+              <label class="gcf-form-label"><span class="req">*</span>Address-City：</label>
+              <div class="gcf-form-controls">
+                <input type="text">
+              </div>
+            </div>
+
+            <!-- Address-Street -->
+            <div class="gcf-form-item">
+              <label class="gcf-form-label"><span class="req">*</span>Address-Street：</label>
+              <div class="gcf-form-controls">
+                <input type="text">
+              </div>
+            </div>
+
+            <!-- Address-Unit/Civic No. -->
+            <div class="gcf-form-item">
+              <label class="gcf-form-label"><span class="req">*</span>Address-Unit/Civic No.：</label>
+              <div class="gcf-form-controls">
+                <input type="text">
+              </div>
+            </div>
+
+            <!-- Address-Zip Code -->
+            <div class="gcf-form-item">
+              <label class="gcf-form-label"><span class="req">*</span>Address-Zip Code：</label>
+              <div class="gcf-form-controls">
+                <input type="text">
+              </div>
+            </div>
+
+            <!-- Currency -->
+            <div class="gcf-form-item">
+              <label class="gcf-form-label"><span class="req">*</span>Currency<span class="info">i</span>：</label>
+              <div class="gcf-form-controls">
+                <div class="gcf-check-group">
+                  <label><input type="checkbox"> USD</label>
+                  <label><input type="checkbox"> EUR</label>
+                  <label><input type="checkbox"> GBP</label>
+                  <label><input type="checkbox"> HKD</label>
+                  <label><input type="checkbox"> AUD</label>
+                  <label><input type="checkbox"> JPY</label>
+                  <label><input type="checkbox"> CAD</label>
+                  <label><input type="checkbox"> KRW</label>
+                  <label><input type="checkbox"> THB</label>
+                  <label><input type="checkbox"> TWD</label>
+                  <label><input type="checkbox"> SGD</label>
+                  <label><input type="checkbox"> RMB</label>
+                  <label><input type="checkbox"> NZD</label>
+                  <label><input type="checkbox"> TRY</label>
+                  <label><input type="checkbox"> MXN</label>
+                  <label><input type="checkbox"> AED</label>
+                  <label><input type="checkbox"> VND</label>
+                  <label><input type="checkbox"> ZCN</label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Available Account -->
+            <div class="gcf-form-item">
+              <label class="gcf-form-label"><span class="req">*</span>Available Account：</label>
+              <div class="gcf-form-controls">
+                <div class="gcf-check-group vertical">
+                  <label><input type="checkbox"> ACEL12201 zongteng</label>
+                  <label><input type="checkbox"> ACEL12213 ALEITEST</label>
+                  <label><input type="checkbox"> ACEL12251 LILFN</label>
+                  <label><input type="checkbox"> ACEL12245 AGENT FOR FIRST LEG</label>
+                  <label><input type="checkbox"> ACEL12244 zongteng</label>
+                  <label><input type="checkbox"> ACEL12215 UI/UEdev1</label>
+                  <label><input type="checkbox"> ACEL12214 cccccccc</label>
+                  <label><input type="checkbox"> ACEL12252 TEST12</label>
+                  <label><input type="checkbox"> ACEL12209 TEST</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="gcf-modal-footer">
+            <button class="gcf-btn-cancel" id="modalCancelBtn">Cancel</button>
+            <button class="gcf-btn-confirm" id="modalConfirmBtn">Confirm</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detail 弹窗 -->
+      <div class="gcf-modal-mask" id="detailModal">
+        <div class="gcf-modal">
+          <div class="gcf-modal-header">
+            <span class="gcf-modal-title">Detail</span>
+            <button class="gcf-modal-close" id="detailCloseBtn" title="Close">×</button>
+          </div>
+
+          <div class="gcf-modal-body">
+            <!-- Bank Card -->
+            <div class="dtl-section">
+              <div class="dtl-section-head">Bank Card</div>
+              <div class="dtl-grid">
+                <div class="dtl-item"><span class="dtl-label">Company:</span><span class="dtl-value" id="dCompany">--</span></div>
+                <div class="dtl-item"><span class="dtl-label">AccountID:</span><span class="dtl-value" id="dAccountId">--</span></div>
+                <div class="dtl-item"><span class="dtl-label">Swift Code:</span><span class="dtl-value">800656515</span></div>
+
+                <div class="dtl-item"><span class="dtl-label">Bank:</span><span class="dtl-value" id="dBank">--</span></div>
+                <div class="dtl-item"><span class="dtl-label">Bank Union Code:</span><span class="dtl-value">313335490028</span></div>
+                <div class="dtl-item tall">
+                  <span class="dtl-label">Account Bank:</span>
+                  <span class="dtl-value">嘉兴银行股份有限公司桐乡濮院支行</span>
+                </div>
+
+                <div class="dtl-item"><span class="dtl-label">BSB Code:</span><span class="dtl-value">--</span></div>
+                <div class="dtl-item"><span class="dtl-label">Currency:</span><span class="dtl-value" id="dCurrency">--</span></div>
+                <div class="dtl-item"><span class="dtl-label">Third-party Payment:</span><span class="dtl-value" id="dThird">--</span></div>
+
+                <div class="dtl-item"><span class="dtl-label">Disclaimer:</span><span class="dtl-value" id="dDisclaimer">--</span></div>
+                <div class="dtl-item tall">
+                  <span class="dtl-label">Entrustment Relationship:</span>
+                  <span class="dtl-value" id="dEntrust">--</span>
+                </div>
+                <div class="dtl-item"><span class="dtl-label">Payment Type:</span><span class="dtl-value">Bank</span></div>
+
+                <div class="dtl-item"><span class="dtl-label">Country/Region of Account:</span><span class="dtl-value">China[CN]</span></div>
+                <div class="dtl-item">
+                  <span class="dtl-label">Letter of Authorization:</span>
+                  <span class="dtl-value"><a>Download</a></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Address -->
+            <div class="dtl-section">
+              <div class="dtl-section-head">Address<span class="info">?</span></div>
+              <div class="dtl-grid">
+                <div class="dtl-item"><span class="dtl-label">Address - Country/Region:</span><span class="dtl-value">--</span></div>
+                <div class="dtl-item"><span class="dtl-label">Address - Province/State:</span><span class="dtl-value">--</span></div>
+                <div class="dtl-item"><span class="dtl-label">Address-City:</span><span class="dtl-value">--</span></div>
+
+                <div class="dtl-item"><span class="dtl-label">Address-Street:</span><span class="dtl-value">--</span></div>
+                <div class="dtl-item"><span class="dtl-label">Address-Unit/Civic No.:</span><span class="dtl-value">--</span></div>
+                <div class="dtl-item"><span class="dtl-label">Address-Zip Code:</span><span class="dtl-value">--</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="gcf-modal-footer">
+            <button class="gcf-btn-confirm" id="detailOkBtn">Close</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit 弹窗 -->
+      <div class="gcf-modal-mask" id="editPaymentModal">
+        <div class="gcf-modal edit-modal">
+          <div class="gcf-modal-header">
+            <span class="gcf-modal-title">Edit Payment Account</span>
+            <button class="gcf-modal-close" id="editCloseBtn" title="Close">×</button>
+          </div>
+
+          <div class="gcf-modal-body">
+            <div class="gcf-form-item">
+              <label class="gcf-form-label"><span class="req">*</span>Payment Type：</label>
+              <div class="gcf-form-controls">
+                <select disabled><option selected>Bank</option></select>
+              </div>
+            </div>
+
+            <div class="gcf-form-item">
+              <label class="gcf-form-label">Third-party payment：</label>
+              <div class="gcf-form-controls">
+                <select disabled id="eThird"><option selected>No</option></select>
+              </div>
+            </div>
+
+            <div class="gcf-form-item">
+              <label class="gcf-form-label"><span class="req">*</span>Bank Name<span class="info">i</span>：</label>
+              <div class="gcf-form-controls">
+                <select disabled id="eBank"><option selected>BOC</option></select>
+              </div>
+            </div>
+
+            <div class="gcf-form-item">
+              <label class="gcf-form-label"><span class="req">*</span>Account Name：</label>
+              <div class="gcf-form-controls">
+                <input type="text" id="eAccountName" readonly>
+              </div>
+            </div>
+
+            <div class="gcf-form-item">
+              <label class="gcf-form-label">Bank Account#：</label>
+              <div class="gcf-form-controls">
+                <input type="text" id="eBankAccount" disabled>
+              </div>
+            </div>
+
+            <div class="gcf-form-item">
+              <label class="gcf-form-label"><span class="req">*</span>Country/Region of Account：</label>
+              <div class="gcf-form-controls">
+                <select disabled><option selected>CA[Canada]</option></select>
+                <div class="gcf-notice">
+                  Notice :For domestic transactions within Canada, it is required that the payer provides the payee's address details. This information is essential as the bank account may be used for future refunds and thus should be submitted beforehand.
+                </div>
+              </div>
+            </div>
+
+            <div class="gcf-form-item">
+              <label class="gcf-form-label"><span class="req">*</span>Swift Code：</label>
+              <div class="gcf-form-controls">
+                <input type="text" value="BKCHCAT2XXX">
+              </div>
+            </div>
+
+            <div class="gcf-form-item">
+              <label class="gcf-form-label"><span class="req">*</span>Address - Country/Region：</label>
+              <div class="gcf-form-controls">
+                <select disabled><option selected>Canada</option></select>
+              </div>
+            </div>
+
+            <div class="gcf-form-item">
+              <label class="gcf-form-label"><span class="req">*</span>Address - Province/State：</label>
+              <div class="gcf-form-controls">
+                <select disabled><option selected>Toronto</option></select>
+              </div>
+            </div>
+
+            <div class="gcf-form-item">
+              <label class="gcf-form-label"><span class="req">*</span>Address-City：</label>
+              <div class="gcf-form-controls"><input type="text" value="1" disabled></div>
+            </div>
+
+            <div class="gcf-form-item">
+              <label class="gcf-form-label"><span class="req">*</span>Address-Street：</label>
+              <div class="gcf-form-controls"><input type="text" value="1" disabled></div>
+            </div>
+
+            <div class="gcf-form-item">
+              <label class="gcf-form-label"><span class="req">*</span>Address-Unit/Civic No.：</label>
+              <div class="gcf-form-controls"><input type="text" value="1" disabled></div>
+            </div>
+
+            <div class="gcf-form-item">
+              <label class="gcf-form-label"><span class="req">*</span>Address-Zip Code：</label>
+              <div class="gcf-form-controls"><input type="text" value="1" disabled></div>
+            </div>
+
+            <div class="gcf-form-item">
+              <label class="gcf-form-label"><span class="req">*</span>Currency<span class="info">i</span>：</label>
+              <div class="gcf-form-controls">
+                <div class="gcf-check-group" id="eCurrencyGroup">
+                  <label><input type="checkbox" value="USD"> USD</label>
+                  <label><input type="checkbox" value="EUR"> EUR</label>
+                  <label><input type="checkbox" value="GBP"> GBP</label>
+                  <label><input type="checkbox" value="HKD"> HKD</label>
+                  <label><input type="checkbox" value="AUD"> AUD</label>
+                  <label><input type="checkbox" value="JPY"> JPY</label>
+                  <label><input type="checkbox" value="CAD" checked> CAD</label>
+                  <label><input type="checkbox" value="KRW"> KRW</label>
+                  <label><input type="checkbox" value="THB"> THB</label>
+                  <label><input type="checkbox" value="TWD"> TWD</label>
+                  <label><input type="checkbox" value="SGD"> SGD</label>
+                  <label><input type="checkbox" value="RMB"> RMB</label>
+                  <label><input type="checkbox" value="NZD"> NZD</label>
+                  <label><input type="checkbox" value="TRY"> TRY</label>
+                  <label><input type="checkbox" value="MXN"> MXN</label>
+                  <label><input type="checkbox" value="AED"> AED</label>
+                  <label><input type="checkbox" value="VND"> VND</label>
+                  <label><input type="checkbox" value="ZCN"> ZCN</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="gcf-form-item">
+              <label class="gcf-form-label"><span class="req">*</span>Available Account：</label>
+              <div class="gcf-form-controls">
+                <div class="gcf-radio-group locked">
+                  <label><input type="radio" name="eAvail" checked> ACEL12201 zongteng</label>
+                  <label><input type="radio" name="eAvail"> ACEL12213 ALEITEST</label>
+                  <label><input type="radio" name="eAvail"> ACEL12251 LILFN</label>
+                  <label><input type="radio" name="eAvail"> ACEL12245 AGENT FOR FIRST LEG</label>
+                  <label><input type="radio" name="eAvail"> ACEL12244 zongteng</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="gcf-modal-footer center">
+            <button class="gcf-btn-cancel" id="editCancelBtn">Cancel</button>
+            <button class="gcf-btn-confirm" id="editConfirmBtn">Confirm</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    </div><!-- /#appContent -->
+
+  </div><!-- /.main -->
+</div><!-- /.layout -->
+
+<script src="assets/app.js" data-page="payment"></script>
+<script>
+  /* 搜索 */
+  function doSearch() {
+    var name = document.getElementById('fName').value.trim().toLowerCase();
+    var accountId = document.getElementById('fAccountId').value;
+    var status = document.getElementById('fStatus').value;
+    var currency = document.getElementById('fCurrency').value;
+    var third = document.getElementById('fThird').value;
+
+    var rows = document.querySelectorAll('#tableBody tr');
+    rows.forEach(function (tr) {
+      var tds = tr.querySelectorAll('td');
+      var rowName = tds[0].textContent.toLowerCase();
+      var rowStatus = tds[1].textContent.trim();
+      var rowCurrency = tds[4].textContent.toUpperCase();
+      var rowAccountId = tds[5].textContent.trim();
+      var rowThird = tds[8].textContent.trim();
+
+      var ok = (!name || rowName.indexOf(name) > -1)
+            && (accountId === 'All' || rowAccountId === accountId)
+            && (status === 'All' || rowStatus === status)
+            && (currency === 'All' || rowCurrency.split('/').indexOf(currency) > -1)
+            && (third === 'All' || rowThird === third);
+      tr.style.display = ok ? '' : 'none';
+    });
+  }
+
+  function doReset() {
+    document.getElementById('fName').value = '';
+    ['fAccountId', 'fStatus', 'fCurrency', 'fThird'].forEach(function (id) {
+      document.getElementById(id).selectedIndex = 0;
+    });
+    doSearch();
+  }
+
+  document.getElementById('searchBtn').addEventListener('click', doSearch);
+  document.getElementById('resetBtn').addEventListener('click', doReset);
+  document.getElementById('fName').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') doSearch();
+  });
+
+  /* ===== Add New 弹窗 ===== */
+  var addModal = document.getElementById('addPaymentModal');
+
+  function openModal() { addModal.classList.add('open'); }
+  function closeModal() { addModal.classList.remove('open'); }
+
+  document.getElementById('addNewBtn').addEventListener('click', openModal);
+  document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+  document.getElementById('modalCancelBtn').addEventListener('click', closeModal);
+  document.getElementById('modalConfirmBtn').addEventListener('click', closeModal);
+  addModal.addEventListener('click', function (e) {
+    if (e.target === addModal) closeModal();
+  });
+
+  /* 国家/地区切换提示文案 */
+  var countrySel = document.getElementById('acctCountry');
+  var noticeEl = document.getElementById('countryNotice');
+  var notices = {
+    'CA[Canada]': "Notice :For domestic transactions within Canada, it is required that the payer provides the payee's address details. This information is essential as the bank account may be used for future refunds and thus should be submitted beforehand."
+  };
+  countrySel.addEventListener('change', function () {
+    var text = notices[countrySel.value];
+    if (text) {
+      noticeEl.textContent = text;
+      noticeEl.style.display = '';
+    } else {
+      noticeEl.textContent = '';
+      noticeEl.style.display = 'none';
+    }
+  });
+
+  /* ===== Detail 弹窗：按行数据填充 ===== */
+  var detailModal = document.getElementById('detailModal');
+
+  function openDetail(row) {
+    var tds = row.querySelectorAll('td');
+    document.getElementById('dCompany').textContent = tds[0].textContent.trim();
+    document.getElementById('dBank').textContent = tds[2].textContent.trim();
+    document.getElementById('dCurrency').textContent = tds[4].textContent.trim().replace(/\//g, ' / ');
+    document.getElementById('dAccountId').textContent = tds[5].textContent.trim().split(' ')[0];
+    document.getElementById('dEntrust').textContent = tds[6].textContent.trim();
+    document.getElementById('dThird').textContent = tds[8].textContent.trim();
+    document.getElementById('dDisclaimer').textContent = tds[9].textContent.trim();
+    detailModal.classList.add('open');
+  }
+  function closeDetail() { detailModal.classList.remove('open'); }
+
+  document.querySelectorAll('#tableBody .gcf-actions-cell a').forEach(function (a) {
+    if (a.textContent.trim() !== 'Detail') return;
+    a.addEventListener('click', function () {
+      openDetail(a.closest('tr'));
+    });
+  });
+  document.getElementById('detailCloseBtn').addEventListener('click', closeDetail);
+  document.getElementById('detailOkBtn').addEventListener('click', closeDetail);
+  detailModal.addEventListener('click', function (e) {
+    if (e.target === detailModal) closeDetail();
+  });
+
+  /* ===== Edit 弹窗：点击 Edit 按行填充 ===== */
+  var editModal = document.getElementById('editPaymentModal');
+
+  function openEdit(row) {
+    var tds = row.querySelectorAll('td');
+    var bank = tds[2].textContent.trim();
+    document.getElementById('eAccountName').value = tds[0].textContent.trim();
+    document.getElementById('eBankAccount').value = tds[3].textContent.trim();
+
+    /* 银行名称：存在对应选项则选中，否则替换选项 */
+    var bankSel = document.getElementById('eBank');
+    var hit = Array.prototype.some.call(bankSel.options, function (o) { return o.text === bank; });
+    if (!hit) bankSel.innerHTML = '<option selected>' + bank + '</option>';
+    else bankSel.value = bank;
+
+    /* Third-party payment 取行内值 */
+    document.getElementById('eThird').innerHTML =
+      '<option selected>' + tds[8].textContent.trim() + '</option>';
+
+    /* 按行内币种勾选 */
+    var curs = tds[4].textContent.trim().split('/');
+    document.querySelectorAll('#eCurrencyGroup input[type="checkbox"]').forEach(function (cb) {
+      cb.checked = curs.indexOf(cb.value) > -1;
+    });
+
+    editModal.classList.add('open');
+  }
+  function closeEdit() { editModal.classList.remove('open'); }
+
+  document.querySelectorAll('#tableBody .gcf-actions-cell a').forEach(function (a) {
+    if (a.textContent.trim() !== 'Edit') return;
+    a.addEventListener('click', function () {
+      openEdit(a.closest('tr'));
+    });
+  });
+  document.getElementById('editCloseBtn').addEventListener('click', closeEdit);
+  document.getElementById('editCancelBtn').addEventListener('click', closeEdit);
+  document.getElementById('editConfirmBtn').addEventListener('click', closeEdit);
+  editModal.addEventListener('click', function (e) {
+    if (e.target === editModal) closeEdit();
+  });
+</script>
+
+</body>
+</html>

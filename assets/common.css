@@ -1,0 +1,182 @@
+/* ===== 基础 ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  font-size: 13px;
+  color: rgba(0,0,0,.85);
+  background: #f0f2f5;
+}
+
+/* ===== 整体布局 ===== */
+.layout { display: flex; min-height: 100vh; }
+
+/* ===== 侧边栏 ===== */
+.sider {
+  width: 208px;
+  flex: 0 0 208px;
+  background: #001529;
+  transition: width .2s, flex-basis .2s;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.sider.collapsed { width: 64px; flex-basis: 64px; }
+
+.sider-logo {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 12px 0 20px;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  background: #002140;
+}
+.sider-logo .logo-text { transition: opacity .2s; overflow: hidden; }
+.sider.collapsed .logo-text { opacity: 0; width: 0; }
+.sider.collapsed .sider-logo { justify-content: center; padding: 0; }
+
+.sider-logo .collapse-btn {
+  width: 26px; height: 26px;
+  flex: 0 0 26px;
+  border: none;
+  background: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+  color: rgba(255,255,255,.65);
+  display: flex; align-items: center; justify-content: center;
+  transition: color .2s, background .2s;
+}
+.sider-logo .collapse-btn:hover { color: #fff; background: rgba(255,255,255,.12); }
+
+.sider-menu { list-style: none; padding: 8px 0; flex: 1; }
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 40px;
+  padding: 0 20px;
+  color: rgba(255,255,255,.65);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color .2s, background .2s;
+}
+.menu-item .mi-icon {
+  width: 16px;
+  flex: 0 0 16px;
+  text-align: center;
+  font-size: 14px;
+  font-style: normal;
+}
+.menu-item .mi-text { transition: opacity .2s; overflow: hidden; }
+.menu-item:hover { color: #fff; background: rgba(255,255,255,.06); }
+.menu-item.active { color: #fff; background: #1890ff; }
+
+/* 折叠时给菜单项加 title 提示，靠 JS 写入 data-tip */
+.sider.collapsed .menu-item { padding: 0 24px; }
+.sider.collapsed .mi-text { opacity: 0; width: 0; }
+
+/* ===== 右侧主区域 ===== */
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+.header {
+  height: 48px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  border-bottom: 1px solid #f0f0f0;
+  flex: 0 0 48px;
+}
+.header .header-title { font-size: 15px; font-weight: 500; }
+
+/* ===== Tab 页签 ===== */
+.tabs {
+  background: #fff;
+  padding: 8px 16px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+.tabs .tab {
+  display: inline-block;
+  padding: 8px 4px;
+  margin-right: 24px;
+  color: rgba(0,0,0,.65);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+.tabs .tab.active {
+  color: #1890ff;
+  border-bottom-color: #1890ff;
+  font-weight: 500;
+}
+
+/* ===== 主体 ===== */
+/* 单页切换时只替换该容器内的内容 */
+#appContent { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.page { padding: 12px 16px 24px; flex: 1; }
+
+/* ===== 通用按钮 ===== */
+.btn {
+  height: 30px;
+  padding: 0 14px;
+  border: 1px solid #d9d9d9;
+  border-radius: 2px;
+  background: #fff;
+  font-size: 13px;
+  cursor: pointer;
+  color: rgba(0,0,0,.85);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+.btn:hover { border-color: #40a9ff; color: #40a9ff; }
+.btn-primary { background: #1890ff; border-color: #1890ff; color: #fff; }
+.btn-primary:hover { background: #40a9ff; border-color: #40a9ff; color: #fff; }
+
+/* ===== 表格列宽拖拽 ===== */
+th { position: relative; }
+.col-resizer {
+  position: absolute;
+  top: 0; right: 0;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 2;
+  user-select: none;
+  touch-action: none;
+}
+.col-resizer::after {
+  content: '';
+  position: absolute;
+  top: 4px; bottom: 4px; right: 2px;
+  width: 1px;
+  background: transparent;
+}
+.col-resizer:hover::after,
+.col-resizer.dragging::after { background: #1890ff; }
+body.col-resizing { cursor: col-resize; user-select: none; }
+
+/* ===== 通用卡片 / 空状态 ===== */
+.card {
+  background: #fff;
+  border-radius: 2px;
+  padding: 12px 16px 16px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.03);
+}
+.empty-state {
+  background: #fff;
+  border-radius: 2px;
+  padding: 80px 16px;
+  text-align: center;
+  color: rgba(0,0,0,.45);
+  box-shadow: 0 1px 2px rgba(0,0,0,.03);
+}
+.empty-state .es-icon { font-size: 40px; margin-bottom: 12px; }
+.empty-state .es-title { font-size: 14px; color: rgba(0,0,0,.65); margin-bottom: 4px; }

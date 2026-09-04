@@ -4,126 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>付款账户列表</title>
+<link rel="stylesheet" href="assets/common.css">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-    font-size: 13px;
-    color: rgba(0,0,0,.85);
-    background: #f0f2f5;
-  }
-
-  /* ===== 整体布局 ===== */
-  .layout { display: flex; min-height: 100vh; }
-
-  /* ===== 侧边栏 ===== */
-  .sider {
-    width: 208px;
-    flex: 0 0 208px;
-    background: #001529;
-    transition: width .2s, flex-basis .2s;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-  .sider.collapsed { width: 64px; flex-basis: 64px; }
-
-  .sider-logo {
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 0 12px 0 20px;
-    color: #fff;
-    font-size: 15px;
-    font-weight: 600;
-    white-space: nowrap;
-    background: #002140;
-  }
-  .sider-logo .logo-text { transition: opacity .2s; overflow: hidden; }
-  .sider.collapsed .logo-text { opacity: 0; width: 0; }
-  .sider.collapsed .sider-logo { justify-content: center; padding: 0; }
-
-  .sider-logo .collapse-btn {
-    width: 26px; height: 26px;
-    flex: 0 0 26px;
-    border: none;
-    background: transparent;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
-    line-height: 1;
-    color: rgba(255,255,255,.65);
-    display: flex; align-items: center; justify-content: center;
-    transition: color .2s, background .2s;
-  }
-  .sider-logo .collapse-btn:hover { color: #fff; background: rgba(255,255,255,.12); }
-
-  .sider-menu { list-style: none; padding: 8px 0; flex: 1; }
-  .menu-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    height: 40px;
-    padding: 0 20px;
-    color: rgba(255,255,255,.65);
-    cursor: pointer;
-    white-space: nowrap;
-    transition: color .2s, background .2s;
-  }
-  .menu-item .mi-icon {
-    width: 16px;
-    flex: 0 0 16px;
-    text-align: center;
-    font-size: 14px;
-    font-style: normal;
-  }
-  .menu-item .mi-text { transition: opacity .2s; overflow: hidden; }
-  .menu-item:hover { color: #fff; background: rgba(255,255,255,.06); }
-  .menu-item.active { color: #fff; background: #1890ff; }
-
-  .sider.collapsed .menu-item { padding: 0 24px; }
-  .sider.collapsed .mi-text { opacity: 0; width: 0; }
-
-  /* ===== 右侧主区域 ===== */
-  .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-
-  .header {
-    height: 48px;
-    background: #fff;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 0 16px;
-    border-bottom: 1px solid #f0f0f0;
-    flex: 0 0 48px;
-  }
-  .header .header-title { font-size: 15px; font-weight: 500; }
-
-  /* ===== Tab 页签 ===== */
-  .tabs {
-    background: #fff;
-    padding: 8px 16px 0;
-    border-bottom: 1px solid #f0f0f0;
-  }
-  .tabs .tab {
-    display: inline-block;
-    padding: 8px 4px;
-    margin-right: 24px;
-    color: rgba(0,0,0,.65);
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-  }
-  .tabs .tab.active {
-    color: #1890ff;
-    border-bottom-color: #1890ff;
-    font-weight: 500;
-  }
-
-  /* ===== 主体 ===== */
-  .page { padding: 12px 16px 24px; }
-
   /* ===== 筛选区 ===== */
   .filter-bar {
     display: flex;
@@ -158,27 +40,6 @@
   select:hover, .filter-item input:hover { border-color: #40a9ff; }
   select:focus, .filter-item input:focus { border-color: #40a9ff; box-shadow: 0 0 0 2px rgba(24,144,255,.1); }
 
-  .btn {
-    height: 30px;
-    padding: 0 14px;
-    border: 1px solid #d9d9d9;
-    border-radius: 2px;
-    background: #fff;
-    font-size: 13px;
-    cursor: pointer;
-    color: rgba(0,0,0,.85);
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    white-space: nowrap;
-  }
-  .btn:hover { border-color: #40a9ff; color: #40a9ff; }
-  .btn-primary {
-    background: #1890ff;
-    border-color: #1890ff;
-    color: #fff;
-  }
-  .btn-primary:hover { background: #40a9ff; border-color: #40a9ff; color: #fff; }
 
   /* ===== 表格卡片 ===== */
   .table-card {
@@ -252,6 +113,75 @@
     border: 1px solid #d9d9d9; border-radius: 2px;
     text-align: center; outline: none;
   }
+
+  /* ===== 付款账户详情弹窗 ===== */
+  .detail-mask {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.45);
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    overflow-y: auto;
+    z-index: 1000;
+    padding: 40px 16px;
+  }
+  .detail-mask.open { display: flex; }
+  .detail-modal {
+    width: 520px;
+    max-width: 100%;
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 6px 16px rgba(0,0,0,.12);
+  }
+  .detail-modal .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 14px 20px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .detail-modal .modal-header .modal-title { font-size: 15px; font-weight: 600; }
+  .detail-modal .modal-header .modal-close { position: absolute; right: 12px; }
+  .detail-body { padding: 26px 24px 30px; }
+  .dtl-row { display: flex; margin-bottom: 18px; }
+  .dtl-row:last-child { margin-bottom: 0; }
+  .dtl-row .dtl-label {
+    flex: 0 0 150px;
+    text-align: right;
+    color: rgba(0,0,0,.75);
+  }
+  .dtl-row .dtl-label .info {
+    display: inline-block;
+    width: 14px; height: 14px;
+    line-height: 13px;
+    text-align: center;
+    border: 1px solid #bfbfbf;
+    border-radius: 50%;
+    font-size: 10px;
+    color: #bfbfbf;
+    margin-left: 3px;
+    cursor: help;
+  }
+  .dtl-row .dtl-value {
+    flex: 1;
+    margin-left: 8px;
+    color: rgba(0,0,0,.85);
+    word-break: break-all;
+  }
+
+  /* ===== 编辑付款账户弹窗 ===== */
+  .modal-footer.center { justify-content: center; }
+  .modal-footer.center .btn { min-width: 72px; }
+  .modal-footer.center .btn-primary { background: #2563eb; border-color: #2563eb; }
+  .modal-footer.center .btn-primary:hover { background: #1d4ed8; border-color: #1d4ed8; }
+  input[readonly].gray, select[disabled] {
+    background: #f5f5f5;
+    color: rgba(0,0,0,.45);
+    cursor: not-allowed;
+  }
+  .edit-modal { width: 720px; }
 
   /* ===== 新增弹窗 ===== */
   .modal-mask {
@@ -371,33 +301,20 @@
 
 <div class="layout">
 
-  <!-- 侧边栏 -->
-  <aside class="sider" id="sider">
-    <div class="sider-logo">
-      <span class="logo-text">R862产品原型</span>
-      <button class="collapse-btn" id="collapseBtn" title="收起/展开菜单">◀</button>
-    </div>
-    <ul class="sider-menu">
-      <li class="menu-item active" data-title="GD-付款账户列表"><i class="mi-icon">💳</i><span class="mi-text">GD-付款账户列表</span></li>
-      <li class="menu-item" data-title="GD-客户退款"><i class="mi-icon">↩️</i><span class="mi-text">GD-客户退款</span></li>
-      <li class="menu-item" data-title="GCF-Payment"><i class="mi-icon">💰</i><span class="mi-text">GCF-Payment</span></li>
-      <li class="menu-item" data-title="GCF-Withdraw"><i class="mi-icon">🏧</i><span class="mi-text">GCF-Withdraw</span></li>
-    </ul>
-  </aside>
+  <!-- 侧边栏（由 assets/app.js 渲染） -->
+  <aside class="sider" id="sider"></aside>
 
   <!-- 右侧主区域 -->
   <div class="main">
 
-    <!-- 头部 -->
-    <header class="header">
-      <span class="header-title" id="headerTitle">GD-付款账户列表</span>
-    </header>
+    <!-- 头部（由 assets/app.js 渲染） -->
+    <header class="header" id="appHeader"></header>
 
-    <!-- 页签 -->
-    <div class="tabs">
-      <span class="tab">首页</span>
-      <span class="tab active" id="tabTitle">付款账户列表 <span style="color:#999;">×</span></span>
-    </div>
+    <!-- 页签（由 assets/app.js 渲染） -->
+    <div class="tabs" id="appTabs"></div>
+
+<!-- 主体内容容器：切换页面时仅替换这里 -->
+<div id="appContent">
 
 <div class="page">
 
@@ -453,7 +370,7 @@
           <th>状态</th>
           <th>是否支持线上充值</th>
           <th>委托关系</th>
-          <th>鱼票到期</th>
+          <th>免责声明</th>
           <th>是否第三方支付</th>
           <th>操作</th>
         </tr>
@@ -657,6 +574,7 @@
   </div>
 
   </div><!-- /.page -->
+  </div><!-- /#appContent -->
   </div><!-- /.main -->
 </div><!-- /.layout -->
 
@@ -866,28 +784,235 @@
   </div>
 </div>
 
+<!-- 编辑付款账户 弹窗 -->
+<div class="modal-mask" id="editModal">
+  <div class="modal edit-modal">
+    <div class="modal-header">
+      <span class="modal-title">编辑付款账户</span>
+      <button class="modal-close" id="editCloseBtn" title="关闭">×</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-item">
+        <label class="form-label"><span class="req">*</span>是否第三方平台：</label>
+        <div class="form-controls">
+          <select id="eThirdPlatform">
+            <option selected>否</option>
+            <option>是</option>
+          </select>
+          <div class="form-hint">使用第三方支付平台付款（例如：pingpong、P卡）。</div>
+        </div>
+      </div>
+
+      <div class="form-item">
+        <label class="form-label">是否第三方支付：</label>
+        <div class="form-controls">
+          <select disabled>
+            <option selected>否</option>
+          </select>
+          <div class="form-hint">付款账户的开户主体与签约主体不一致。</div>
+        </div>
+      </div>
+
+      <div class="form-item">
+        <label class="form-label"><span class="req">*</span>银行名称：</label>
+        <div class="form-controls">
+          <select id="eBankName">
+            <option selected>中国银行</option>
+            <option>招商银行</option>
+            <option>南洋商业银行</option>
+            <option>澳门国际银行</option>
+            <option>其他银行</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-item">
+        <label class="form-label"><span class="req">*</span>账户名称：</label>
+        <div class="form-controls">
+          <div class="input-wrap">
+            <input type="text" id="eAccountName" maxlength="255" readonly class="gray">
+            <span class="count">0/255</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-item">
+        <label class="form-label"><span class="req">*</span>账号：</label>
+        <div class="form-controls">
+          <div class="input-wrap">
+            <input type="text" id="eAccountNo" maxlength="50" readonly class="gray">
+            <span class="count">0/50</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-item">
+        <label class="form-label"><span class="req">*</span>开户行国家/地区：</label>
+        <div class="form-controls">
+          <select id="eCountry">
+            <option selected>加拿大</option>
+            <option>中国</option>
+            <option>中国香港</option>
+            <option>美国</option>
+            <option>新加坡</option>
+          </select>
+          <div class="form-warning" id="eCountryNotice">加拿大当地付款时需要打款人提供收款人地址信息。此银行未来可能用于接收退款，因此需要提前提供。</div>
+        </div>
+      </div>
+
+      <div class="form-item">
+        <label class="form-label"><span class="req">*</span>开户行名称：</label>
+        <div class="form-controls">
+          <input type="text" id="eOpenBank" value="BOC">
+        </div>
+      </div>
+
+      <div class="form-item">
+        <label class="form-label"><span class="req">*</span>Swift Code：</label>
+        <div class="form-controls">
+          <input type="text" id="eSwift" value="BKCHCAT2XXX">
+        </div>
+      </div>
+
+      <div class="form-item">
+        <label class="form-label"><span class="req">*</span>地址-国家/地区：</label>
+        <div class="form-controls">
+          <select>
+            <option selected>加拿大</option>
+            <option>中国</option>
+            <option>美国</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-item">
+        <label class="form-label"><span class="req">*</span>地址-省/州：</label>
+        <div class="form-controls">
+          <select>
+            <option selected>多伦多</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-item">
+        <label class="form-label"><span class="req">*</span>地址-城市名：</label>
+        <div class="form-controls">
+          <div class="input-wrap">
+            <input type="text" id="eCity" maxlength="35" value="多伦多">
+            <span class="count">0/35</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-item">
+        <label class="form-label"><span class="req">*</span>地址-街道名：</label>
+        <div class="form-controls">
+          <div class="input-wrap">
+            <input type="text" maxlength="70" value="1">
+            <span class="count">0/70</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-item">
+        <label class="form-label"><span class="req">*</span>地址-建筑号：</label>
+        <div class="form-controls">
+          <div class="input-wrap">
+            <input type="text" maxlength="16" value="1">
+            <span class="count">0/16</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-item">
+        <label class="form-label"><span class="req">*</span>地址-邮编：</label>
+        <div class="form-controls">
+          <div class="input-wrap">
+            <input type="text" maxlength="16" value="10101">
+            <span class="count">0/16</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-item">
+        <label class="form-label"><span class="req">*</span>可充值币种：</label>
+        <div class="form-controls">
+          <div class="checkbox-group" id="eCurrencyGroup">
+            <label><input type="checkbox" value="USD"> USD</label>
+            <label><input type="checkbox" value="EUR"> EUR</label>
+            <label><input type="checkbox" value="GBP"> GBP</label>
+            <label><input type="checkbox" value="HKD"> HKD</label>
+            <label><input type="checkbox" value="AUD"> AUD</label>
+            <label><input type="checkbox" value="JPY"> JPY</label>
+            <label><input type="checkbox" value="CAD" checked> CAD</label>
+            <label><input type="checkbox" value="KRW"> KRW</label>
+            <label><input type="checkbox" value="THB"> THB</label>
+            <label><input type="checkbox" value="TWD"> TWD</label>
+            <label><input type="checkbox" value="SGD"> SGD</label>
+            <label><input type="checkbox" value="RMB"> RMB</label>
+            <label><input type="checkbox" value="NZD"> NZD</label>
+            <label><input type="checkbox" value="TRY"> TRY</label>
+            <label><input type="checkbox" value="MXN"> MXN</label>
+            <label><input type="checkbox" value="AED"> AED</label>
+            <label><input type="checkbox" value="VND"> VND</label>
+            <label><input type="checkbox" value="ZCN"> ZCN</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-item">
+        <label class="form-label"><span class="req">*</span>可充值账户：</label>
+        <div class="form-controls">
+          <select id="eChargeAccount" disabled>
+            <option selected>ACG56258 GOGOMG INTERNATIONAL GROUP (HK) LIMITED 海外仓储</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-item">
+        <label class="form-label"></label>
+        <div class="form-controls">
+          <div class="form-warning">提示： 当付款账户名与签约主体名称不一致时，需要上传委托付款函，支持PDF/ZIP/PNG/JPG不超过30M。</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer center">
+      <button class="btn" id="editCancelBtn">取消</button>
+      <button class="btn btn-primary" id="editSubmitBtn">提交</button>
+    </div>
+  </div>
+</div>
+
+<!-- 付款账户详情 弹窗 -->
+<div class="detail-mask" id="detailModal">
+  <div class="detail-modal">
+    <div class="modal-header">
+      <span class="modal-title">付款账户详情</span>
+      <button class="modal-close" id="detailCloseBtn" title="关闭">×</button>
+    </div>
+    <div class="detail-body">
+      <div class="dtl-row"><span class="dtl-label">签约主体名称：</span><span class="dtl-value" id="dCompany">--</span></div>
+      <div class="dtl-row"><span class="dtl-label">是否第三方平台：</span><span class="dtl-value" id="dThirdPlatform">--</span></div>
+      <div class="dtl-row"><span class="dtl-label">是否第三方支付<span class="info">i</span>：</span><span class="dtl-value" id="dThirdPay">--</span></div>
+      <div class="dtl-row"><span class="dtl-label">银行名称：</span><span class="dtl-value" id="dBankName">--</span></div>
+      <div class="dtl-row"><span class="dtl-label">账户编号：</span><span class="dtl-value" id="dAccountNo">--</span></div>
+      <div class="dtl-row"><span class="dtl-label">开户行国家/地区：</span><span class="dtl-value" id="dCountry">--</span></div>
+      <div class="dtl-row"><span class="dtl-label">开户行名称：</span><span class="dtl-value" id="dOpenBank">--</span></div>
+      <div class="dtl-row"><span class="dtl-label">联行号：</span><span class="dtl-value">--</span></div>
+      <div class="dtl-row"><span class="dtl-label">BSB Code：</span><span class="dtl-value">--</span></div>
+      <div class="dtl-row"><span class="dtl-label">Swift Code：</span><span class="dtl-value">ING6520XX</span></div>
+      <div class="dtl-row"><span class="dtl-label">币种：</span><span class="dtl-value" id="dCurrency">--</span></div>
+      <div class="dtl-row"><span class="dtl-label">委托关系<span class="info">i</span>：</span><span class="dtl-value" id="dEntrust">--</span></div>
+      <div class="dtl-row"><span class="dtl-label">委托付款源：</span><span class="dtl-value">--</span></div>
+      <div class="dtl-row"><span class="dtl-label">免责声明：</span><span class="dtl-value" id="dDisclaimer">--</span></div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/app.js" data-page="list"></script>
 <script>
-  var sider = document.getElementById('sider');
-  var btn = document.getElementById('collapseBtn');
-  var headerTitle = document.getElementById('headerTitle');
-  var tabTitle = document.getElementById('tabTitle');
-
-  btn.addEventListener('click', function () {
-    var collapsed = sider.classList.toggle('collapsed');
-    btn.textContent = collapsed ? '▶' : '◀';
-    btn.title = collapsed ? '展开菜单' : '收起菜单';
-  });
-
-  document.querySelectorAll('.menu-item').forEach(function (item) {
-    item.addEventListener('click', function () {
-      document.querySelectorAll('.menu-item').forEach(function (i) { i.classList.remove('active'); });
-      item.classList.add('active');
-      var title = item.dataset.title;
-      headerTitle.textContent = title;
-      tabTitle.innerHTML = title + ' <span style="color:#999;">×</span>';
-    });
-  });
-
   /* ===== 新增付款账户弹窗 ===== */
   var addModal = document.getElementById('addModal');
   document.getElementById('addBtn').addEventListener('click', function () {
@@ -904,6 +1029,85 @@
   });
   addModal.addEventListener('click', function (e) {
     if (e.target === addModal) addModal.classList.remove('open');
+  });
+
+  /* ===== 付款账户详情弹窗：点击「详情」按行填充 ===== */
+  var detailModal = document.getElementById('detailModal');
+
+  function openDetail(row) {
+    var tds = row.querySelectorAll('td');
+    /* 列顺序：账户名称/银行/账号/币种/充值账户/状态/线上充值/委托关系/免责声明/第三方支付 */
+    document.getElementById('dCompany').textContent = tds[0].textContent.trim();
+    document.getElementById('dThirdPlatform').textContent = '否';
+    document.getElementById('dThirdPay').textContent = tds[9].textContent.trim();
+    document.getElementById('dBankName').textContent = tds[1].textContent.trim();
+    document.getElementById('dAccountNo').textContent = tds[4].textContent.trim().split(' ')[0];
+    document.getElementById('dCountry').textContent = '中国香港';
+    document.getElementById('dOpenBank').textContent = tds[1].textContent.trim();
+    document.getElementById('dCurrency').textContent = tds[3].textContent.trim().split(',').join(',');
+    document.getElementById('dEntrust').textContent = tds[7].textContent.trim();
+    document.getElementById('dDisclaimer').textContent = tds[8].textContent.trim();
+    detailModal.classList.add('open');
+  }
+  function closeDetail() { detailModal.classList.remove('open'); }
+
+  document.querySelectorAll('.table-card .actions a').forEach(function (a) {
+    if (a.textContent.trim() !== '详情') return;
+    a.addEventListener('click', function () {
+      openDetail(a.closest('tr'));
+    });
+  });
+  document.getElementById('detailCloseBtn').addEventListener('click', closeDetail);
+  detailModal.addEventListener('click', function (e) {
+    if (e.target === detailModal) closeDetail();
+  });
+
+  /* ===== 编辑付款账户弹窗：点击「编辑」按行填充 ===== */
+  var editModal = document.getElementById('editModal');
+
+  function refreshCounts() {
+    document.querySelectorAll('#editModal .input-wrap input').forEach(function (input) {
+      input.dispatchEvent(new Event('input'));
+    });
+  }
+
+  function openEdit(row) {
+    var tds = row.querySelectorAll('td');
+    document.getElementById('eBankName').value = tds[1].textContent.trim();
+    document.getElementById('eAccountName').value = tds[0].textContent.trim();
+    document.getElementById('eAccountNo').value = tds[2].textContent.trim();
+    document.getElementById('eChargeAccount').innerHTML =
+      '<option selected>' + tds[4].textContent.trim() + '</option>';
+
+    /* 按行内币种勾选可充值币种 */
+    var curs = tds[3].textContent.trim().split(',');
+    document.querySelectorAll('#eCurrencyGroup input[type="checkbox"]').forEach(function (cb) {
+      cb.checked = curs.indexOf(cb.value) > -1;
+    });
+
+    refreshCounts();
+    editModal.classList.add('open');
+  }
+  function closeEdit() { editModal.classList.remove('open'); }
+
+  document.querySelectorAll('.table-card .actions a').forEach(function (a) {
+    if (a.textContent.trim() !== '编辑') return;
+    a.addEventListener('click', function () {
+      openEdit(a.closest('tr'));
+    });
+  });
+  document.getElementById('editCloseBtn').addEventListener('click', closeEdit);
+  document.getElementById('editCancelBtn').addEventListener('click', closeEdit);
+  document.getElementById('editSubmitBtn').addEventListener('click', closeEdit);
+  editModal.addEventListener('click', function (e) {
+    if (e.target === editModal) closeEdit();
+  });
+
+  /* 开户行国家/地区提示联动（仅加拿大显示） */
+  var eCountry = document.getElementById('eCountry');
+  var eCountryNotice = document.getElementById('eCountryNotice');
+  eCountry.addEventListener('change', function () {
+    eCountryNotice.style.display = eCountry.value === '加拿大' ? '' : 'none';
   });
 
   /* 字数统计 */
