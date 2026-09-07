@@ -175,6 +175,47 @@
     cursor: pointer;
   }
   .fu-back:hover { border-color: #2563eb; color: #2563eb; }
+
+  /* ===== 更新字段标记（深绿色 + update 标识） ===== */
+  .updated { color: #0f7a3d; }
+  .fps-field .fps-label.updated { color: #0f7a3d; }
+  .badge-update {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 0 5px;
+    font-size: 11px;
+    line-height: 16px;
+    color: #fff;
+    background: #0f7a3d;
+    border-radius: 2px;
+    font-weight: 400;
+  }
+  .fps-table th.updated { color: #0f7a3d; font-weight: 600; }
+  .fps-table td.contractor-cell { color: #0f7a3d; }
+
+  /* ===== 底部操作按钮 ===== */
+  .fps-footer {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    padding: 6px 0 16px;
+  }
+  .fps-btn {
+    height: 32px;
+    padding: 0 22px;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .fps-btn-primary { background: #2563eb; border: 1px solid #2563eb; color: #fff; }
+  .fps-btn-primary:hover { background: #1d4ed8; }
+  .fps-btn-plain { background: #fff; border: 1px solid #d9d9d9; color: rgba(0,0,0,.75); }
+  .fps-btn-plain:hover { border-color: #2563eb; color: #2563eb; }
+
+  /* 确认弹窗提示语 */
+  .confirm-text { padding: 18px 20px 22px; font-size: 13px; line-height: 1.7; color: rgba(0,0,0,.85); }
+  .m-modal.narrow { width: 460px; }
+  .m-header.left { justify-content: flex-start; }
 </style>
 </head>
 <body>
@@ -224,8 +265,8 @@
             <!-- 第二列 -->
             <div>
               <div class="fps-field">
-                <span class="fps-label">* 付款主体</span>
-                <select disabled>
+                <span class="fps-label updated">* 付款主体<span class="badge-update">update</span></span>
+                <select disabled id="paySubject">
                   <option selected>ETARGET LIMITED</option>
                 </select>
               </div>
@@ -290,7 +331,7 @@
               <tr>
                 <th style="width:44px">选择</th>
                 <th>账户类型</th>
-                <th>我司签约主体</th>
+                <th class="updated">我司签约主体<span class="badge-update">update</span></th>
                 <th>银行名称</th>
                 <th>账户名称</th>
                 <th>银行账号</th>
@@ -304,7 +345,7 @@
               <tr>
                 <td><input type="radio" name="fpsAcc" checked></td>
                 <td>境内</td>
-                <td>深圳易可达科技有限公司</td>
+                <td class="contractor-cell">深圳易可达科技有限公司</td>
                 <td>中国农业银行</td>
                 <td class="ellipsis">上海中国际货运代理有限公司</td>
                 <td>203300</td>
@@ -316,7 +357,7 @@
               <tr>
                 <td><input type="radio" name="fpsAcc"></td>
                 <td>境外</td>
-                <td>ETARGET LIMITED</td>
+                <td class="contractor-cell">ETARGET LIMITED</td>
                 <td>汇豐银行</td>
                 <td>CITIGKP</td>
                 <td>100100</td>
@@ -328,7 +369,7 @@
               <tr>
                 <td><input type="radio" name="fpsAcc"></td>
                 <td>境外</td>
-                <td>ETARGET LIMITED</td>
+                <td class="contractor-cell">ETARGET LIMITED</td>
                 <td>花旗银行</td>
                 <td>QIANYA</td>
                 <td>326596265</td>
@@ -340,7 +381,7 @@
               <tr>
                 <td><input type="radio" name="fpsAcc"></td>
                 <td>境内</td>
-                <td>深圳易可达科技有限公司</td>
+                <td class="contractor-cell">深圳易可达科技有限公司</td>
                 <td>中国农业银行</td>
                 <td>SHANGHAIQIANYA</td>
                 <td>778899999</td>
@@ -352,7 +393,7 @@
               <tr>
                 <td><input type="radio" name="fpsAcc"></td>
                 <td>境外</td>
-                <td>深圳易可达科技有限公司</td>
+                <td class="contractor-cell">深圳易可达科技有限公司</td>
                 <td>中国农业银行</td>
                 <td>SHANGHAIQIANYA</td>
                 <td>200300</td>
@@ -364,7 +405,7 @@
               <tr>
                 <td><input type="radio" name="fpsAcc"></td>
                 <td>境外</td>
-                <td>ETARGET LIMITED</td>
+                <td class="contractor-cell">ETARGET LIMITED</td>
                 <td>花旗银行</td>
                 <td>QIANYA</td>
                 <td>21212121</td>
@@ -375,6 +416,29 @@
               </tr>
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <!-- 底部操作按钮 -->
+      <div class="fps-footer">
+        <button class="fps-btn fps-btn-primary" id="fpsSubmitBtn">提交</button>
+        <button class="fps-btn fps-btn-plain" id="fpsBackBtn">返回</button>
+      </div>
+
+      <!-- 提交确认弹窗 -->
+      <div class="m-modal-mask" id="fpsConfirmModal">
+        <div class="m-modal narrow">
+          <div class="m-header left">
+            <span class="m-title">提示</span>
+            <button class="m-close" id="fpsConfirmClose" title="关闭">×</button>
+          </div>
+          <div class="confirm-text">
+            用户当前勾选的银行账号我司签约主体与付款主体不一致，支付时可能会退单，请确认是否继续提交？
+          </div>
+          <div class="m-footer">
+            <button class="m-btn-cancel" id="fpsConfirmCancel">取消</button>
+            <button class="m-btn-confirm" id="fpsConfirmOk">确定</button>
+          </div>
         </div>
       </div>
 
@@ -504,6 +568,41 @@
       openFullInfo(a.closest('tr'));
     });
   });
+  /* ===== 提交 / 返回 ===== */
+  var confirmModal = document.getElementById('fpsConfirmModal');
+
+  function closeConfirm() { confirmModal.classList.remove('open'); }
+
+  document.getElementById('fpsSubmitBtn').addEventListener('click', function () {
+    /* 取当前勾选行的「我司签约主体」，与付款主体比对 */
+    var checked = document.querySelector('#fpsBody input[type="radio"]:checked');
+    var contractor = '';
+    if (checked) {
+      var tr = checked.closest('tr');
+      var tds = tr.querySelectorAll('td');
+      contractor = tds[2].textContent.trim();
+    }
+    var paySubject = document.getElementById('paySubject').value.trim();
+
+    if (contractor && contractor !== paySubject) {
+      confirmModal.classList.add('open');     /* 不一致：提示确认 */
+    }
+    /* 一致时原型阶段直接跳过，可在接入接口后提交 */
+  });
+
+  document.getElementById('fpsBackBtn').addEventListener('click', function () {
+    /* 原型：返回上一页 */
+    if (history.length > 1) history.back();
+    else location.href = 'index.html';
+  });
+
+  document.getElementById('fpsConfirmClose').addEventListener('click', closeConfirm);
+  document.getElementById('fpsConfirmCancel').addEventListener('click', closeConfirm);
+  document.getElementById('fpsConfirmOk').addEventListener('click', closeConfirm);
+  confirmModal.addEventListener('click', function (e) {
+    if (e.target === confirmModal) closeConfirm();
+  });
+
   document.getElementById('fuCloseBtn').addEventListener('click', closeFullInfo);
   document.getElementById('fuBackBtn').addEventListener('click', closeFullInfo);
   fullInfoModal.addEventListener('click', function (e) {
