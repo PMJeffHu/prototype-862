@@ -431,6 +431,148 @@
         </div>
       </div>
 
+      <!-- Edit Payment Account 弹窗 -->
+      <div class="m-modal-mask" id="editPaymentModal">
+        <div class="m-modal">
+          <div class="m-header">
+            <span class="m-title">Edit Payment Account</span>
+            <button class="m-close" id="editCloseBtn" title="Close">×</button>
+          </div>
+
+          <div class="m-body">
+            <div class="m-form-item">
+              <label class="m-label"><span class="req">*</span>Payment Type：</label>
+              <div class="m-controls">
+                <select disabled><option selected>Bank</option></select>
+              </div>
+            </div>
+
+            <div class="m-form-item">
+              <label class="m-label">Third-party payment：</label>
+              <div class="m-controls">
+                <select disabled id="eThird"><option selected>No</option></select>
+              </div>
+            </div>
+
+            <div class="m-form-item">
+              <label class="m-label"><span class="req">*</span>Bank Name<span class="info">i</span>：</label>
+              <div class="m-controls">
+                <select disabled id="eBank"><option selected>BOC</option></select>
+              </div>
+            </div>
+
+            <div class="m-form-item">
+              <label class="m-label"><span class="req">*</span>Account Name：</label>
+              <div class="m-controls">
+                <input type="text" id="eAccountName" readonly>
+              </div>
+            </div>
+
+            <div class="m-form-item">
+              <label class="m-label">Bank Account#：</label>
+              <div class="m-controls">
+                <input type="text" id="eBankAccount" disabled>
+              </div>
+            </div>
+
+            <div class="m-form-item">
+              <label class="m-label"><span class="req">*</span>Country/Region of Account：</label>
+              <div class="m-controls">
+                <select disabled><option selected>CA[Canada]</option></select>
+                <div class="m-notice">
+                  Notice :For domestic transactions within Canada, it is required that the payer provides the payee's address details. This information is essential as the bank account may be used for future refunds and thus should be submitted beforehand.
+                </div>
+              </div>
+            </div>
+
+            <div class="m-form-item">
+              <label class="m-label"><span class="req">*</span>Swift Code：</label>
+              <div class="m-controls">
+                <input type="text" value="BKCHCAT2XXX">
+              </div>
+            </div>
+
+            <div class="m-form-item">
+              <label class="m-label"><span class="req">*</span>Address - Country/Region：</label>
+              <div class="m-controls">
+                <select disabled><option selected>Canada</option></select>
+              </div>
+            </div>
+
+            <div class="m-form-item">
+              <label class="m-label"><span class="req">*</span>Address - Province/State：</label>
+              <div class="m-controls">
+                <select disabled><option selected>Toronto</option></select>
+              </div>
+            </div>
+
+            <div class="m-form-item">
+              <label class="m-label"><span class="req">*</span>Address-City：</label>
+              <div class="m-controls"><input type="text" value="1" disabled></div>
+            </div>
+
+            <div class="m-form-item">
+              <label class="m-label"><span class="req">*</span>Address-Street：</label>
+              <div class="m-controls"><input type="text" value="1" disabled></div>
+            </div>
+
+            <div class="m-form-item">
+              <label class="m-label"><span class="req">*</span>Address-Unit/Civic No.：</label>
+              <div class="m-controls"><input type="text" value="1" disabled></div>
+            </div>
+
+            <div class="m-form-item">
+              <label class="m-label"><span class="req">*</span>Address-Zip Code：</label>
+              <div class="m-controls"><input type="text" value="1" disabled></div>
+            </div>
+
+            <div class="m-form-item">
+              <label class="m-label"><span class="req">*</span>Currency<span class="info">i</span>：</label>
+              <div class="m-controls">
+                <div class="m-check-group" id="eCurrencyGroup">
+                  <label><input type="checkbox" value="USD"> USD</label>
+                  <label><input type="checkbox" value="EUR"> EUR</label>
+                  <label><input type="checkbox" value="GBP"> GBP</label>
+                  <label><input type="checkbox" value="HKD"> HKD</label>
+                  <label><input type="checkbox" value="AUD"> AUD</label>
+                  <label><input type="checkbox" value="JPY"> JPY</label>
+                  <label><input type="checkbox" value="CAD" checked> CAD</label>
+                  <label><input type="checkbox" value="KRW"> KRW</label>
+                  <label><input type="checkbox" value="THB"> THB</label>
+                  <label><input type="checkbox" value="TWD"> TWD</label>
+                  <label><input type="checkbox" value="SGD"> SGD</label>
+                  <label><input type="checkbox" value="RMB"> RMB</label>
+                  <label><input type="checkbox" value="NZD"> NZD</label>
+                  <label><input type="checkbox" value="TRY"> TRY</label>
+                  <label><input type="checkbox" value="MXN"> MXN</label>
+                  <label><input type="checkbox" value="AED"> AED</label>
+                  <label><input type="checkbox" value="VND"> VND</label>
+                  <label><input type="checkbox" value="ZCN"> ZCN</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="m-form-item">
+              <label class="m-label"><span class="req">*</span>Available Account：</label>
+              <div class="m-controls">
+                <div class="m-radio-group">
+                  <label><input type="radio" name="wAvail" checked> ACEL12201 zongteng</label>
+                  <label><input type="radio" name="wAvail"> ACEL12213 ALEITEST</label>
+                  <label><input type="radio" name="wAvail"> ACEL12251 LILFN</label>
+                  <label><input type="radio" name="wAvail"> ACEL12245 AGENT FOR FIRST LEG</label>
+                  <label><input type="radio" name="wAvail"> ACEL12244 zongteng</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="m-footer">
+            <button class="m-btn-cancel" id="editCancelBtn">Cancel</button>
+            <button class="m-btn-confirm" id="editConfirmBtn">Confirm</button>
+          </div>
+        </div>
+      </div>
+
     </div>
     </div><!-- /#appContent -->
 
@@ -511,6 +653,49 @@
         fileNameEl.textContent = '已选择：' + e.dataTransfer.files[0].name;
       }
     });
+  });
+
+  /* ===== Edit Payment Account 弹窗：点击收款账户表格的 Edit 打开 ===== */
+  var editModal = document.getElementById('editPaymentModal');
+
+  function openEdit(row) {
+    if (!editModal || !row) return;
+    var tds = row.querySelectorAll('td');
+    if (tds.length < 5) return;
+    /* 列顺序：单选 / Bank Name / Account Name / Bank Account# / Currency / Action */
+    var bank = tds[1].textContent.trim();
+    document.getElementById('eAccountName').value = tds[2].textContent.trim();
+    document.getElementById('eBankAccount').value = tds[3].textContent.trim();
+
+    var bankSel = document.getElementById('eBank');
+    var hit = Array.prototype.some.call(bankSel.options, function (o) { return o.text === bank; });
+    if (!hit) bankSel.innerHTML = '<option selected>' + bank + '</option>';
+    else bankSel.value = bank;
+
+    /* 币种：按行内币种勾选 */
+    var curs = tds[4].textContent.toUpperCase().split(/[,\/]/).map(function (s) { return s.trim(); });
+    document.querySelectorAll('#eCurrencyGroup input[type="checkbox"]').forEach(function (cb) {
+      cb.checked = curs.indexOf(cb.value) > -1;
+    });
+
+    editModal.classList.add('open');
+  }
+  function closeEdit() { editModal.classList.remove('open'); }
+
+  /* 事件委托：页面重新渲染后依然生效 */
+  document.addEventListener('click', function (e) {
+    var target = e.target || e.srcElement;
+    var link = target.closest ? target.closest('#recvBody a') : null;
+    if (!link || link.textContent.trim() !== 'Edit') return;
+    e.preventDefault();
+    e.stopPropagation();            /* 避免触发整行单选 */
+    openEdit(link.closest('tr'));
+  }, true);
+  document.getElementById('editCloseBtn').addEventListener('click', closeEdit);
+  document.getElementById('editCancelBtn').addEventListener('click', closeEdit);
+  document.getElementById('editConfirmBtn').addEventListener('click', closeEdit);
+  editModal.addEventListener('click', function (e) {
+    if (e.target === editModal) closeEdit();
   });
 
   /* Submit（原型占位） */
