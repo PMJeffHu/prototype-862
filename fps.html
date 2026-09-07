@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FPS-应付结算</title>
+<link rel="stylesheet" href="assets/common.css">
+<style>
+  /* ===== 分区标题 ===== */
+  .fps-section {
+    background: #fff;
+    border-radius: 2px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.03);
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .fps-section-head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 14px;
+    background: #eef5ff;
+    color: #2563eb;
+    font-size: 13px;
+    font-weight: 600;
+    border-left: 3px solid #2563eb;
+  }
+  .fps-section-body { padding: 16px 16px 6px; }
+
+  /* ===== 付款信息三列布局 ===== */
+  .fps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px 28px;
+  }
+  @media (max-width: 1100px) { .fps-grid { grid-template-columns: 1fr; } }
+
+  .fps-field { margin-bottom: 14px; }
+  .fps-field > .fps-label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 6px;
+    color: #2b7ce9;
+  }
+  .fps-label .info {
+    display: inline-block;
+    width: 14px; height: 14px;
+    line-height: 13px;
+    text-align: center;
+    border: 1px solid #b7cdf3;
+    border-radius: 50%;
+    font-size: 10px;
+    color: #7aa7e8;
+    cursor: help;
+  }
+  .fps-field input[type="text"],
+  .fps-field select {
+    width: 100%;
+    height: 32px;
+    padding: 0 10px;
+    border: 1px solid #d9d9d9;
+    border-radius: 3px;
+    font-size: 13px;
+    color: rgba(0,0,0,.85);
+    outline: none;
+    background: #fff;
+  }
+  .fps-field select {
+    appearance: none;
+    padding-right: 30px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bfbfbf'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+  }
+  .fps-field select:disabled,
+  .fps-field input:disabled {
+    background: #f5f5f5;
+    color: rgba(0,0,0,.45);
+    cursor: not-allowed;
+  }
+  .fps-field input:hover, .fps-field select:hover { border-color: #40a9ff; }
+  .fps-field input:focus, .fps-field select:focus { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,.12); }
+  .fps-field input::placeholder { color: #b8c4d9; }
+
+  /* 单选组 */
+  .fps-radios { display: flex; align-items: center; gap: 22px; height: 32px; }
+  .fps-radios label { display: inline-flex; align-items: center; gap: 5px; color: rgba(0,0,0,.8); cursor: pointer; }
+  .fps-radios input { accent-color: #2563eb; }
+
+  /* ===== 银行账号信息表 ===== */
+  .fps-table-card { overflow-x: auto; }
+  .fps-table { width: 100%; border-collapse: collapse; min-width: 980px; }
+  .fps-table th {
+    background: #f4f7fe;
+    text-align: left;
+    font-weight: 500;
+    color: rgba(0,0,0,.75);
+    padding: 10px 12px;
+    border-bottom: 1px solid #e5e7eb;
+    white-space: nowrap;
+  }
+  .fps-table td {
+    padding: 11px 12px;
+    border-bottom: 1px solid #f0f0f0;
+    color: rgba(0,0,0,.8);
+    white-space: nowrap;
+  }
+  .fps-table tbody tr:hover td { background: #f8fafc; }
+  .fps-table input[type="radio"] { accent-color: #2563eb; cursor: pointer; }
+  .fps-table a { color: #2563eb; text-decoration: none; cursor: pointer; white-space: nowrap; }
+  .fps-table a:hover { text-decoration: underline; }
+  .fps-table td.ellipsis { max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
+
+  /* ===== 查看完整信息弹窗 ===== */
+  .fu-mask {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.45);
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    overflow-y: auto;
+    z-index: 1000;
+    padding: 32px 16px;
+  }
+  .fu-mask.open { display: flex; }
+  .fu-modal {
+    width: 1080px;
+    max-width: 100%;
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.18);
+  }
+  .fu-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+  }
+  .fu-header .fu-title { font-size: 15px; font-weight: 600; }
+  .fu-close {
+    border: none;
+    background: transparent;
+    font-size: 16px;
+    color: rgba(0,0,0,.55);
+    cursor: pointer;
+    width: 26px; height: 26px;
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .fu-close:hover { background: #f0f0f0; color: rgba(0,0,0,.85); }
+
+  .fu-body { padding: 0 18px 6px; max-height: 72vh; overflow-y: auto; }
+  .fu-table { width: 100%; border-collapse: collapse; }
+  .fu-table td {
+    border: 1px solid #e3e3e3;
+    padding: 7px 12px;
+    font-size: 12px;
+    color: rgba(0,0,0,.8);
+    word-break: break-all;
+  }
+  .fu-table td.k { width: 26%; background: #ececec; font-family: Consolas, Menlo, monospace; }
+  .fu-table td.n { width: 34%; background: #ececec; }
+  .fu-table tr:nth-child(even) td.v { background: #f7f7f7; }
+  .fu-footer { padding: 16px 0 20px; display: flex; justify-content: center; }
+  .fu-back {
+    height: 30px;
+    padding: 0 20px;
+    background: #fff;
+    border: 1px solid #d9d9d9;
+    border-radius: 3px;
+    font-size: 13px;
+    color: rgba(0,0,0,.8);
+    cursor: pointer;
+  }
+  .fu-back:hover { border-color: #2563eb; color: #2563eb; }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- 侧边栏（由 assets/app.js 渲染） -->
+  <aside class="sider" id="sider"></aside>
+
+  <div class="main">
+
+    <header class="header" id="appHeader"></header>
+
+    <div class="tabs" id="appTabs"></div>
+
+    <div id="appContent">
+    <div class="page">
+
+      <!-- 付款信息 -->
+      <div class="fps-section">
+        <div class="fps-section-head">¥ 付款信息</div>
+        <div class="fps-section-body">
+          <div class="fps-grid">
+
+            <!-- 第一列 -->
+            <div>
+              <div class="fps-field">
+                <span class="fps-label">* 是否支持主支付<span class="info">i</span></span>
+                <div class="fps-radios">
+                  <label><input type="radio" name="mainPay" checked> 否</label>
+                  <label><input type="radio" name="mainPay"> 是</label>
+                </div>
+              </div>
+              <div class="fps-field">
+                <span class="fps-label">* 支付平台</span>
+                <input type="text" value="汇联">
+              </div>
+              <div class="fps-field">
+                <span class="fps-label">* 是否展示附件<span class="info">i</span></span>
+                <div class="fps-radios">
+                  <label><input type="radio" name="showAttach" checked> 否</label>
+                  <label><input type="radio" name="showAttach"> 是</label>
+                </div>
+              </div>
+            </div>
+
+            <!-- 第二列 -->
+            <div>
+              <div class="fps-field">
+                <span class="fps-label">* 付款主体</span>
+                <select disabled>
+                  <option selected>ETARGET LIMITED</option>
+                </select>
+              </div>
+              <div class="fps-field">
+                <span class="fps-label">* 付款银行账号</span>
+                <input type="text" value="0">
+              </div>
+              <div class="fps-field">
+                <span class="fps-label">* 付款备注</span>
+                <input type="text" value="1">
+              </div>
+            </div>
+
+            <!-- 第三列 -->
+            <div>
+              <div class="fps-field">
+                <span class="fps-label">* 结算币种</span>
+                <select disabled>
+                  <option selected>USD</option>
+                </select>
+              </div>
+              <div class="fps-field">
+                <span class="fps-label">* 应付银行日期<span class="info">i</span></span>
+                <input type="text" value="2026-09-07">
+              </div>
+              <div class="fps-field">
+                <span class="fps-label">付款类型<span class="info">i</span></span>
+                <select>
+                  <option selected>银行转账</option>
+                  <option>现金</option>
+                  <option>支票</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 第四列 -->
+            <div>
+              <div class="fps-field">
+                <span class="fps-label">* 期待付款日期<span class="info">i</span></span>
+                <input type="text" value="2026-09-07">
+              </div>
+              <div class="fps-field">
+                <span class="fps-label">请输入银行回单信息</span>
+                <input type="text" placeholder="请输入银行回单信息">
+              </div>
+              <div class="fps-field">
+                <span class="fps-label">交易流水号</span>
+                <input type="text" placeholder="付款交易号认证成功，25字符以内">
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- 银行账号信息 -->
+      <div class="fps-section">
+        <div class="fps-section-head">≡ 银行账号信息</div>
+        <div class="fps-section-body fps-table-card">
+          <table class="fps-table">
+            <thead>
+              <tr>
+                <th style="width:44px">选择</th>
+                <th>账户类型</th>
+                <th>我司签约主体</th>
+                <th>银行名称</th>
+                <th>账户名称</th>
+                <th>银行账号</th>
+                <th>银行号/Swift Code</th>
+                <th>本地结算号</th>
+                <th>币种</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="fpsBody">
+              <tr>
+                <td><input type="radio" name="fpsAcc" checked></td>
+                <td>境内</td>
+                <td>深圳易可达科技有限公司</td>
+                <td>中国农业银行</td>
+                <td class="ellipsis">上海中国际货运代理有限公司</td>
+                <td>203300</td>
+                <td>DSR500000009/--</td>
+                <td>--</td>
+                <td>CNY</td>
+                <td><a>查看完整信息</a></td>
+              </tr>
+              <tr>
+                <td><input type="radio" name="fpsAcc"></td>
+                <td>境外</td>
+                <td>ETARGET LIMITED</td>
+                <td>汇豐银行</td>
+                <td>CITIGKP</td>
+                <td>100100</td>
+                <td>--/CITIEHX</td>
+                <td>1021021</td>
+                <td>USD</td>
+                <td><a>查看完整信息</a></td>
+              </tr>
+              <tr>
+                <td><input type="radio" name="fpsAcc"></td>
+                <td>境外</td>
+                <td>ETARGET LIMITED</td>
+                <td>花旗银行</td>
+                <td>QIANYA</td>
+                <td>326596265</td>
+                <td>--/788SDS131232</td>
+                <td>123232323</td>
+                <td>EUR</td>
+                <td><a>查看完整信息</a></td>
+              </tr>
+              <tr>
+                <td><input type="radio" name="fpsAcc"></td>
+                <td>境内</td>
+                <td>深圳易可达科技有限公司</td>
+                <td>中国农业银行</td>
+                <td>SHANGHAIQIANYA</td>
+                <td>778899999</td>
+                <td>DSF500000009/--</td>
+                <td>66666666</td>
+                <td>CNY</td>
+                <td><a>查看完整信息</a></td>
+              </tr>
+              <tr>
+                <td><input type="radio" name="fpsAcc"></td>
+                <td>境外</td>
+                <td>深圳易可达科技有限公司</td>
+                <td>中国农业银行</td>
+                <td>SHANGHAIQIANYA</td>
+                <td>200300</td>
+                <td>--/SYSDSHCZ1133</td>
+                <td>6222626262</td>
+                <td>CNY</td>
+                <td><a>查看完整信息</a></td>
+              </tr>
+              <tr>
+                <td><input type="radio" name="fpsAcc"></td>
+                <td>境外</td>
+                <td>ETARGET LIMITED</td>
+                <td>花旗银行</td>
+                <td>QIANYA</td>
+                <td>21212121</td>
+                <td>--/CITIO0212</td>
+                <td>1122334455</td>
+                <td>GBP</td>
+                <td><a>查看完整信息</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 查看完整信息 弹窗 -->
+      <div class="fu-mask" id="fullInfoModal">
+        <div class="fu-modal">
+          <div class="fu-header">
+            <span class="fu-title">查看完整信息</span>
+            <button class="fu-close" id="fuCloseBtn" title="关闭">×</button>
+          </div>
+          <div class="fu-body">
+            <table class="fu-table">
+              <tbody>
+                <tr><td class="k">sap_code</td><td class="n">供应商编码</td><td class="v">PS16997945</td></tr>
+                <tr><td class="k">ContractorCode</td><td class="n">我司签约主体</td><td class="v" id="fiContractor">ETARGET LIMITED</td></tr>
+                <tr><td class="k">business_supplier_code</td><td class="n">业务系统供应商编码</td><td class="v">IR7356</td></tr>
+                <tr><td class="k">bank_code</td><td class="n">银行代码:如:ABC(中国农业银行)</td><td class="v" id="fiBankCode">CIT</td></tr>
+                <tr><td class="k">bank_name</td><td class="n">银行名称:如:中国农业银行</td><td class="v" id="fiBankName">花旗银行</td></tr>
+                <tr><td class="k">account_type</td><td class="n">账户类型:0:境内,1:境外</td><td class="v" id="fiAccountType">1</td></tr>
+                <tr><td class="k">account_type_name</td><td class="n">账户类型名称:境内或境外</td><td class="v" id="fiAccountTypeName">境外</td></tr>
+                <tr><td class="k">opening_bank_name</td><td class="n">开户行名称:如:招商银行深圳四海支行</td><td class="v">CITIXGP</td></tr>
+                <tr><td class="k">account_name</td><td class="n">账户名称:银行账号持有者</td><td class="v" id="fiAccountName">CITIXGP</td></tr>
+                <tr><td class="k">bank_account</td><td class="n">银行账号</td><td class="v" id="fiBankAccount">100100</td></tr>
+                <tr><td class="k">currency_code</td><td class="n">币种</td><td class="v" id="fiCurrencyCode">USD</td></tr>
+                <tr><td class="k">currency_name</td><td class="n">币种名称</td><td class="v" id="fiCurrencyName">美国 美元</td></tr>
+                <tr><td class="k">bank_country</td><td class="n">开户行国家/地区</td><td class="v">HK</td></tr>
+                <tr><td class="k">bank_country_name</td><td class="n">开户行国家/地区名称</td><td class="v">the Hong Kong Special Administrative Region of Chi</td></tr>
+                <tr><td class="k">bank_province</td><td class="n">开户行省份</td><td class="v">HK</td></tr>
+                <tr><td class="k">bank_province_name</td><td class="n">开户行省份名称</td><td class="v">Haut-Katanga</td></tr>
+                <tr><td class="k">bank_city</td><td class="n">开户行城市</td><td class="v"></td></tr>
+                <tr><td class="k">bank_city_name</td><td class="n">开户行城市名称</td><td class="v"></td></tr>
+                <tr><td class="k">bank_address</td><td class="n">开户行地址</td><td class="v"></td></tr>
+                <tr><td class="k">union_number</td><td class="n">联行号</td><td class="v"></td></tr>
+                <tr><td class="k">bsb_code</td><td class="n">BsBCode</td><td class="v" id="fiBsb">1021021</td></tr>
+                <tr><td class="k">swift_code</td><td class="n">SwiftCode</td><td class="v" id="fiSwift">CITIE2X</td></tr>
+                <tr><td class="k">payee_country</td><td class="n">收款人国家/地区</td><td class="v">HK</td></tr>
+                <tr><td class="k">payee_country_name</td><td class="n">收款人国家/地区名称</td><td class="v">the Hong Kong Special Administrative Region of Chi</td></tr>
+                <tr><td class="k">payee_province</td><td class="n">收款人省/州</td><td class="v">HK</td></tr>
+                <tr><td class="k">payee_province_name</td><td class="n">收款人省/州名称</td><td class="v">Haut-Katanga</td></tr>
+                <tr><td class="k">payee_city</td><td class="n">收款人城市</td><td class="v">KONGKONG</td></tr>
+                <tr><td class="k">payee_street</td><td class="n">收款人详细地址-街道名</td><td class="v">1</td></tr>
+                <tr><td class="k">payee_build_number</td><td class="n">收款人详细地址-建筑号(门牌号)</td><td class="v">1</td></tr>
+                <tr><td class="k">payee_post_code</td><td class="n">收款人详细地址-邮编</td><td class="v">10100</td></tr>
+                <tr><td class="k">freeze_status</td><td class="n">冻结状态</td><td class="v">1</td></tr>
+                <tr><td class="k">freeze_status_name</td><td class="n">冻结状态名称</td><td class="v">开户</td></tr>
+                <tr><td class="k">is_private</td><td class="n">是否对私银行1:对私;2:对公 默认对公</td><td class="v">2</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="fu-footer">
+            <button class="fu-back" id="fuBackBtn">返 回</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    </div><!-- /#appContent -->
+
+  </div><!-- /.main -->
+</div><!-- /.layout -->
+
+<script src="assets/app.js" data-page="fps"></script>
+<script>
+  /* 点击整行选中单选 */
+  var rows = document.querySelectorAll('#fpsBody tr');
+  rows.forEach(function (tr) {
+    tr.addEventListener('click', function (e) {
+      if (e.target.tagName === 'A') return;
+      var radio = tr.querySelector('input[type="radio"]');
+      if (radio) radio.checked = true;
+    });
+  });
+
+  /* ===== 查看完整信息弹窗：按行填充 ===== */
+  var fullInfoModal = document.getElementById('fullInfoModal');
+  var currencyNames = {
+    'CNY': '中国 人民币',
+    'USD': '美国 美元',
+    'EUR': '欧元区 欧元',
+    'GBP': '英国 英镑',
+    'JPY': '日本 日元',
+    'HKD': '中国香港 港币'
+  };
+  var bankCodes = {
+    '中国农业银行': 'ABC',
+    '汇豐银行': 'HSBC',
+    '花旗银行': 'CIT'
+  };
+
+  function setText(id, text) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = text;
+  }
+
+  function openFullInfo(row) {
+    var tds = row.querySelectorAll('td');
+    /* 列顺序：单选/账户类型/我司签约主体/银行名称/账户名称/银行账号/银行号与Swift/本地结算号/币种 */
+    var accountType = tds[1].textContent.trim();
+    var contractor = tds[2].textContent.trim();
+    var bankName = tds[3].textContent.trim();
+    var swiftCell = tds[6].textContent.trim();
+    var currency = tds[8].textContent.trim();
+
+    setText('fiContractor', contractor || (currency === 'CNY' ? '深圳易可达科技有限公司' : 'ETARGET LIMITED'));
+    setText('fiBankName', bankName);
+    setText('fiBankCode', bankCodes[bankName] || '--');
+    setText('fiAccountType', accountType === '境内' ? '0' : '1');
+    setText('fiAccountTypeName', accountType);
+    setText('fiAccountName', tds[4].textContent.trim());
+    setText('fiBankAccount', tds[5].textContent.trim());
+    setText('fiCurrencyCode', currency);
+    setText('fiCurrencyName', currencyNames[currency] || currency);
+    setText('fiBsb', tds[7].textContent.trim());
+
+    /* 银行号/Swift Code 形如 "XXX/--" 或 "--/YYY"，取非空的一段 */
+    var parts = swiftCell.split('/');
+    var swift = parts.length > 1 ? (parts[1] !== '--' ? parts[1] : parts[0]) : swiftCell;
+    setText('fiSwift', swift);
+
+    fullInfoModal.classList.add('open');
+  }
+  function closeFullInfo() { fullInfoModal.classList.remove('open'); }
+
+  document.querySelectorAll('#fpsBody a').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      e.stopPropagation();
+      openFullInfo(a.closest('tr'));
+    });
+  });
+  document.getElementById('fuCloseBtn').addEventListener('click', closeFullInfo);
+  document.getElementById('fuBackBtn').addEventListener('click', closeFullInfo);
+  fullInfoModal.addEventListener('click', function (e) {
+    if (e.target === fullInfoModal) closeFullInfo();
+  });
+</script>
+
+</body>
+</html>

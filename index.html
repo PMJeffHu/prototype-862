@@ -114,6 +114,10 @@
     text-align: center; outline: none;
   }
 
+  /* 境内汇款代码：聚焦时隐藏灰色提示语 */
+  input.domestic-code::placeholder { color: rgba(0,0,0,.35); }
+  input.domestic-code:focus::placeholder { color: transparent; }
+
   /* ===== 付款账户详情弹窗 ===== */
   .detail-mask {
     position: fixed;
@@ -659,11 +663,27 @@
         </div>
       </div>
 
+      <!-- 联行号 -->
+      <div class="form-item">
+        <label class="form-label"><span class="req">*</span>联行号：</label>
+        <div class="form-controls">
+          <input type="text">
+        </div>
+      </div>
+
       <!-- Swift Code -->
       <div class="form-item">
         <label class="form-label"><span class="req">*</span>Swift Code：</label>
         <div class="form-controls">
           <input type="text">
+        </div>
+      </div>
+
+      <!-- 境内汇款代码 -->
+      <div class="form-item">
+        <label class="form-label">境内汇款代码：</label>
+        <div class="form-controls">
+          <input type="text" class="domestic-code" placeholder="本地汇款需要提供，如BSBcode/Routing number/Sort Code等">
         </div>
       </div>
 
@@ -869,6 +889,13 @@
       </div>
 
       <div class="form-item">
+        <label class="form-label"><span class="req">*</span>联行号：</label>
+        <div class="form-controls">
+          <input type="text" id="eUnionCode">
+        </div>
+      </div>
+
+      <div class="form-item">
         <label class="form-label"><span class="req">*</span>Swift Code：</label>
         <div class="form-controls">
           <input type="text" id="eSwift" value="BKCHCAT2XXX">
@@ -876,7 +903,14 @@
       </div>
 
       <div class="form-item">
-        <label class="form-label"><span class="req">*</span>地址-国家/地区：</label>
+        <label class="form-label">境内汇款代码：</label>
+        <div class="form-controls">
+          <input type="text" class="domestic-code" placeholder="本地汇款需要提供，如BSBcode/Routing number/Sort Code等">
+        </div>
+      </div>
+
+      <div class="form-item">
+        <label class="form-label"><span class="req">*</span>付款方国家/地区：</label>
         <div class="form-controls">
           <select>
             <option selected>加拿大</option>
@@ -887,7 +921,7 @@
       </div>
 
       <div class="form-item">
-        <label class="form-label"><span class="req">*</span>地址-省/州：</label>
+        <label class="form-label"><span class="req">*</span>付款方省/州：</label>
         <div class="form-controls">
           <select>
             <option selected>多伦多</option>
@@ -896,7 +930,7 @@
       </div>
 
       <div class="form-item">
-        <label class="form-label"><span class="req">*</span>地址-城市名：</label>
+        <label class="form-label"><span class="req">*</span>付款方城市名：</label>
         <div class="form-controls">
           <div class="input-wrap">
             <input type="text" id="eCity" maxlength="35" value="多伦多">
@@ -906,7 +940,7 @@
       </div>
 
       <div class="form-item">
-        <label class="form-label"><span class="req">*</span>地址-街道名：</label>
+        <label class="form-label"><span class="req">*</span>付款方街道名：</label>
         <div class="form-controls">
           <div class="input-wrap">
             <input type="text" maxlength="70" value="1">
@@ -916,7 +950,7 @@
       </div>
 
       <div class="form-item">
-        <label class="form-label"><span class="req">*</span>地址-建筑号：</label>
+        <label class="form-label"><span class="req">*</span>付款方建筑号：</label>
         <div class="form-controls">
           <div class="input-wrap">
             <input type="text" maxlength="16" value="1">
@@ -926,7 +960,7 @@
       </div>
 
       <div class="form-item">
-        <label class="form-label"><span class="req">*</span>地址-邮编：</label>
+        <label class="form-label"><span class="req">*</span>付款方邮编：</label>
         <div class="form-controls">
           <div class="input-wrap">
             <input type="text" maxlength="16" value="10101">
@@ -1001,8 +1035,8 @@
       <div class="dtl-row"><span class="dtl-label">开户行国家/地区：</span><span class="dtl-value" id="dCountry">--</span></div>
       <div class="dtl-row"><span class="dtl-label">开户行名称：</span><span class="dtl-value" id="dOpenBank">--</span></div>
       <div class="dtl-row"><span class="dtl-label">联行号：</span><span class="dtl-value">--</span></div>
-      <div class="dtl-row"><span class="dtl-label">BSB Code：</span><span class="dtl-value">--</span></div>
       <div class="dtl-row"><span class="dtl-label">Swift Code：</span><span class="dtl-value">ING6520XX</span></div>
+      <div class="dtl-row"><span class="dtl-label">境内汇款代码：</span><span class="dtl-value">--</span></div>
       <div class="dtl-row"><span class="dtl-label">币种：</span><span class="dtl-value" id="dCurrency">--</span></div>
       <div class="dtl-row"><span class="dtl-label">委托关系<span class="info">i</span>：</span><span class="dtl-value" id="dEntrust">--</span></div>
       <div class="dtl-row"><span class="dtl-label">委托付款源：</span><span class="dtl-value">--</span></div>
@@ -1108,6 +1142,15 @@
   var eCountryNotice = document.getElementById('eCountryNotice');
   eCountry.addEventListener('change', function () {
     eCountryNotice.style.display = eCountry.value === '加拿大' ? '' : 'none';
+  });
+
+  /* 境内汇款代码：聚焦时隐藏提示语，失焦且为空时恢复 */
+  document.querySelectorAll('input.domestic-code').forEach(function (input) {
+    var tip = input.getAttribute('placeholder');
+    input.addEventListener('focus', function () { input.setAttribute('placeholder', ''); });
+    input.addEventListener('blur', function () {
+      if (!input.value) input.setAttribute('placeholder', tip);
+    });
   });
 
   /* 字数统计 */

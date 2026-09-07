@@ -98,6 +98,71 @@
   .gcf-add:hover { background: #eff6ff; }
   .gcf-add .plus { font-size: 15px; line-height: 1; }
 
+  /* ===== 可搜索单选下拉（Other Bank Name） ===== */
+  .gcf-combo { position: relative; }
+  .gcf-combo .combo-input {
+    width: 100%;
+    height: 34px;
+    padding: 0 30px 0 10px;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    font-size: 13px;
+    color: rgba(0,0,0,.85);
+    outline: none;
+    cursor: pointer;
+    background: #fff;
+  }
+  .gcf-combo .combo-input:hover { border-color: #40a9ff; }
+  .gcf-combo .combo-input:focus { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,.12); }
+  .gcf-combo .combo-caret {
+    position: absolute;
+    right: 10px; top: 10px;
+    color: #bfbfbf;
+    font-size: 10px;
+    pointer-events: none;
+  }
+  .gcf-combo .combo-list {
+    display: none;
+    position: absolute;
+    z-index: 20;
+    top: 38px; left: 0; right: 0;
+    max-height: 200px;
+    overflow-y: auto;
+    margin: 0;
+    padding: 4px 0;
+    list-style: none;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    box-shadow: 0 6px 16px rgba(0,0,0,.12);
+  }
+  .gcf-combo.open .combo-list { display: block; }
+  .gcf-combo .combo-list li {
+    padding: 7px 12px;
+    cursor: pointer;
+    color: rgba(0,0,0,.85);
+  }
+  .gcf-combo .combo-list li:hover,
+  .gcf-combo .combo-list li.active { background: #eff6ff; color: #2563eb; }
+  .gcf-combo .combo-list li.no-result { color: rgba(0,0,0,.45); cursor: default; }
+  .gcf-combo .combo-list li.no-result:hover { background: transparent; color: rgba(0,0,0,.45); }
+
+  /* BCI Code 提示语：聚焦时隐藏 */
+  .gcf-form-controls input.hint-input::placeholder,
+  .dtl-value input.hint-input::placeholder { color: rgba(0,0,0,.35); }
+  .gcf-form-controls input.hint-input:focus::placeholder,
+  .dtl-value input.hint-input:focus::placeholder { color: transparent; }
+  .dtl-value input.hint-input {
+    width: 100%;
+    height: 30px;
+    padding: 0 8px;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    font-size: 13px;
+    outline: none;
+  }
+  .dtl-value input.hint-input:focus { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,.12); }
+
   /* ===== 表格 ===== */
   .gcf-table-card {
     background: #fff;
@@ -631,6 +696,32 @@
               </div>
             </div>
 
+            <!-- Other Bank Name（可搜索单选） -->
+            <div class="gcf-form-item">
+              <label class="gcf-form-label">Other Bank Name：</label>
+              <div class="gcf-form-controls">
+                <div class="gcf-combo" id="otherBankCombo">
+                  <input type="text" class="combo-input" placeholder="Select or search" autocomplete="off">
+                  <span class="combo-caret">▾</span>
+                  <ul class="combo-list">
+                    <li data-value="ICBC">中国工商银行 ICBC</li>
+                    <li data-value="ABC">中国农业银行 ABC</li>
+                    <li data-value="BOC">中国银行 BOC</li>
+                    <li data-value="CCB">中国建设银行 CCB</li>
+                    <li data-value="BOCOM">交通银行 BOCOM</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bank Union Code -->
+            <div class="gcf-form-item">
+              <label class="gcf-form-label">Bank Union Code：</label>
+              <div class="gcf-form-controls">
+                <input type="text" value="200200200200" disabled>
+              </div>
+            </div>
+
             <!-- Swift Code -->
             <div class="gcf-form-item">
               <label class="gcf-form-label"><span class="req">*</span>Swift Code：</label>
@@ -639,9 +730,17 @@
               </div>
             </div>
 
-            <!-- Address - Country/Region -->
+            <!-- BCI Code -->
             <div class="gcf-form-item">
-              <label class="gcf-form-label"><span class="req">*</span>Address - Country/Region：</label>
+              <label class="gcf-form-label">BCI Code：</label>
+              <div class="gcf-form-controls">
+                <input type="text" class="hint-input" placeholder="Bank Clearing Identifier: Routing number/sort code/BSB number, etc.">
+              </div>
+            </div>
+
+            <!-- Payer-Country/Region -->
+            <div class="gcf-form-item">
+              <label class="gcf-form-label"><span class="req">*</span>Payer-Country/Region：</label>
               <div class="gcf-form-controls">
                 <select>
                   <option selected></option>
@@ -653,9 +752,9 @@
               </div>
             </div>
 
-            <!-- Address - Province/State -->
+            <!-- Payer-Province/State -->
             <div class="gcf-form-item">
-              <label class="gcf-form-label"><span class="req">*</span>Address - Province/State：</label>
+              <label class="gcf-form-label"><span class="req">*</span>Payer-Province/State：</label>
               <div class="gcf-form-controls">
                 <select>
                   <option selected></option>
@@ -663,33 +762,33 @@
               </div>
             </div>
 
-            <!-- Address-City -->
+            <!-- Payer-City -->
             <div class="gcf-form-item">
-              <label class="gcf-form-label"><span class="req">*</span>Address-City：</label>
+              <label class="gcf-form-label"><span class="req">*</span>Payer-City：</label>
               <div class="gcf-form-controls">
                 <input type="text">
               </div>
             </div>
 
-            <!-- Address-Street -->
+            <!-- Payer-Street -->
             <div class="gcf-form-item">
-              <label class="gcf-form-label"><span class="req">*</span>Address-Street：</label>
+              <label class="gcf-form-label"><span class="req">*</span>Payer-Street：</label>
               <div class="gcf-form-controls">
                 <input type="text">
               </div>
             </div>
 
-            <!-- Address-Unit/Civic No. -->
+            <!-- Payer-Unit/Civic No. -->
             <div class="gcf-form-item">
-              <label class="gcf-form-label"><span class="req">*</span>Address-Unit/Civic No.：</label>
+              <label class="gcf-form-label"><span class="req">*</span>Payer-Unit/Civic No.：</label>
               <div class="gcf-form-controls">
                 <input type="text">
               </div>
             </div>
 
-            <!-- Address-Zip Code -->
+            <!-- Payer-Zip Code -->
             <div class="gcf-form-item">
-              <label class="gcf-form-label"><span class="req">*</span>Address-Zip Code：</label>
+              <label class="gcf-form-label"><span class="req">*</span>Payer-Zip Code：</label>
               <div class="gcf-form-controls">
                 <input type="text">
               </div>
@@ -764,6 +863,7 @@
                 <div class="dtl-item"><span class="dtl-label">Company:</span><span class="dtl-value" id="dCompany">--</span></div>
                 <div class="dtl-item"><span class="dtl-label">AccountID:</span><span class="dtl-value" id="dAccountId">--</span></div>
                 <div class="dtl-item"><span class="dtl-label">Swift Code:</span><span class="dtl-value">800656515</span></div>
+                <div class="dtl-item"><span class="dtl-label">BCI Code:</span><span class="dtl-value">--</span></div>
 
                 <div class="dtl-item"><span class="dtl-label">Bank:</span><span class="dtl-value" id="dBank">--</span></div>
                 <div class="dtl-item"><span class="dtl-label">Bank Union Code:</span><span class="dtl-value">313335490028</span></div>
@@ -772,7 +872,7 @@
                   <span class="dtl-value">嘉兴银行股份有限公司桐乡濮院支行</span>
                 </div>
 
-                <div class="dtl-item"><span class="dtl-label">BSB Code:</span><span class="dtl-value">--</span></div>
+
                 <div class="dtl-item"><span class="dtl-label">Currency:</span><span class="dtl-value" id="dCurrency">--</span></div>
                 <div class="dtl-item"><span class="dtl-label">Third-party Payment:</span><span class="dtl-value" id="dThird">--</span></div>
 
@@ -795,13 +895,13 @@
             <div class="dtl-section">
               <div class="dtl-section-head">Address<span class="info">?</span></div>
               <div class="dtl-grid">
-                <div class="dtl-item"><span class="dtl-label">Address - Country/Region:</span><span class="dtl-value">--</span></div>
-                <div class="dtl-item"><span class="dtl-label">Address - Province/State:</span><span class="dtl-value">--</span></div>
-                <div class="dtl-item"><span class="dtl-label">Address-City:</span><span class="dtl-value">--</span></div>
+                <div class="dtl-item"><span class="dtl-label">Payer-Country/Region:</span><span class="dtl-value">--</span></div>
+                <div class="dtl-item"><span class="dtl-label">Payer-Province/State:</span><span class="dtl-value">--</span></div>
+                <div class="dtl-item"><span class="dtl-label">Payer-City:</span><span class="dtl-value">--</span></div>
 
-                <div class="dtl-item"><span class="dtl-label">Address-Street:</span><span class="dtl-value">--</span></div>
-                <div class="dtl-item"><span class="dtl-label">Address-Unit/Civic No.:</span><span class="dtl-value">--</span></div>
-                <div class="dtl-item"><span class="dtl-label">Address-Zip Code:</span><span class="dtl-value">--</span></div>
+                <div class="dtl-item"><span class="dtl-label">Payer-Street:</span><span class="dtl-value">--</span></div>
+                <div class="dtl-item"><span class="dtl-label">Payer-Unit/Civic No.:</span><span class="dtl-value">--</span></div>
+                <div class="dtl-item"><span class="dtl-label">Payer-Zip Code:</span><span class="dtl-value">--</span></div>
               </div>
             </div>
           </div>
@@ -870,6 +970,13 @@
               <label class="gcf-form-label"><span class="req">*</span>Swift Code：</label>
               <div class="gcf-form-controls">
                 <input type="text" value="BKCHCAT2XXX">
+              </div>
+            </div>
+
+            <div class="gcf-form-item">
+              <label class="gcf-form-label">BCI Code：</label>
+              <div class="gcf-form-controls">
+                <input type="text" class="hint-input" placeholder="Bank Clearing Identifier: Routing number/sort code/BSB number, etc.">
               </div>
             </div>
 
@@ -962,6 +1069,75 @@
 
 <script src="assets/app.js" data-page="payment"></script>
 <script>
+  /* ===== Other Bank Name：可搜索单选 ===== */
+  (function () {
+    var combo = document.getElementById('otherBankCombo');
+    if (!combo) return;
+    var input = combo.querySelector('.combo-input');
+    var list = combo.querySelector('.combo-list');
+    var items = Array.prototype.slice.call(list.querySelectorAll('li'));
+
+    function open() {
+      filter('');
+      combo.classList.add('open');
+    }
+    function close() { combo.classList.remove('open'); }
+
+    function filter(keyword) {
+      var kw = (keyword || '').trim().toLowerCase();
+      var hit = 0;
+      items.forEach(function (li) {
+        var text = li.textContent.toLowerCase();
+        var show = !kw || text.indexOf(kw) > -1;
+        li.style.display = show ? '' : 'none';
+        if (show) hit++;
+      });
+      var empty = list.querySelector('.no-result');
+      if (hit === 0) {
+        if (!empty) {
+          empty = document.createElement('li');
+          empty.className = 'no-result';
+          empty.textContent = 'No data';
+          list.appendChild(empty);
+        }
+        empty.style.display = '';
+      } else if (empty) {
+        empty.style.display = 'none';
+      }
+    }
+
+    input.addEventListener('focus', open);
+    input.addEventListener('click', open);
+    input.addEventListener('input', function () {
+      open();
+      filter(input.value);
+    });
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') close();
+    });
+
+    list.addEventListener('click', function (e) {
+      var li = e.target.closest('li');
+      if (!li || li.classList.contains('no-result')) return;
+      input.value = li.textContent.trim();
+      input.setAttribute('data-value', li.getAttribute('data-value') || '');
+      close();
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!combo.contains(e.target)) close();
+    });
+  })();
+
+  /* BCI Code：聚焦时隐藏提示语，失焦且为空时恢复 */
+  document.querySelectorAll('input.hint-input').forEach(function (input) {
+    var tip = input.getAttribute('placeholder');
+    input.addEventListener('focus', function () { input.setAttribute('placeholder', ''); });
+    input.addEventListener('blur', function () {
+      if (!input.value) input.setAttribute('placeholder', tip);
+    });
+  });
+
   /* 搜索 */
   function doSearch() {
     var name = document.getElementById('fName').value.trim().toLowerCase();
