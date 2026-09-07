@@ -586,6 +586,7 @@
   var topbarDeposit = document.getElementById('topbarDeposit');
   var topbarBalance = document.getElementById('topbarBalance');
   var proofField = document.getElementById('proofField');
+  var amountUnit = document.getElementById('amountUnit');   /* 必须先声明，syncWithdrawType 中会用到 */
 
   function syncWithdrawType() {
     var isBalance = withdrawType.value === 'Balance';
@@ -598,7 +599,6 @@
   syncWithdrawType();
 
   /* 币种卡片切换（两种模式通用） */
-  var amountUnit = document.getElementById('amountUnit');
   function bindDepositTabs(containerId) {
     var cards = document.querySelectorAll('#' + containerId + ' .wd-deposit');
     cards.forEach(function (card) {
