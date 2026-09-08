@@ -264,9 +264,8 @@ body.col-resizing { cursor: col-resize; user-select: none; }
 
 .m-controls .m-notice { margin-top: 6px; color: #f59e0b; font-size: 12px; line-height: 1.6; }
 
-/* 带提示语的输入框（如 BCI Code）：聚焦时隐藏提示语 */
-.m-controls input.hint-input::placeholder { color: rgba(0,0,0,.35); }
-.m-controls input.hint-input:focus::placeholder { color: transparent; }
+/* 常显说明文字（如 BCI Code） */
+.m-controls .m-tip { margin-top: 6px; color: #FA8C16; font-size: 12px; line-height: 1.6; }
 
 .m-check-group { display: flex; flex-wrap: wrap; padding-top: 6px; }
 .m-check-group label {

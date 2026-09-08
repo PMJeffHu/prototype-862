@@ -495,42 +495,43 @@
             <div class="m-form-item">
               <label class="m-label">BCI Code：</label>
               <div class="m-controls">
-                <input type="text" class="hint-input" placeholder="Bank Clearing Identifier: Routing number/sort code/BSB number, etc.">
+                <input type="text">
+                <div class="m-tip">Bank Clearing Identifier: Routing number/sort code/BSB number, etc.</div>
               </div>
             </div>
 
             <div class="m-form-item">
               <label class="m-label"><span class="req">*</span>Payer-Country/Region：</label>
               <div class="m-controls">
-                <select disabled><option selected>Canada</option></select>
+                <input type="text" value="Canada">
               </div>
             </div>
 
             <div class="m-form-item">
               <label class="m-label"><span class="req">*</span>Payer-Province/State：</label>
               <div class="m-controls">
-                <select disabled><option selected>Toronto</option></select>
+                <input type="text" value="Toronto">
               </div>
             </div>
 
             <div class="m-form-item">
               <label class="m-label"><span class="req">*</span>Payer-City：</label>
-              <div class="m-controls"><input type="text" value="1" disabled></div>
+              <div class="m-controls"><input type="text" value="1"></div>
             </div>
 
             <div class="m-form-item">
               <label class="m-label"><span class="req">*</span>Payer-Street：</label>
-              <div class="m-controls"><input type="text" value="1" disabled></div>
+              <div class="m-controls"><input type="text" value="1"></div>
             </div>
 
             <div class="m-form-item">
               <label class="m-label"><span class="req">*</span>Payer-Unit/Civic No.：</label>
-              <div class="m-controls"><input type="text" value="1" disabled></div>
+              <div class="m-controls"><input type="text" value="1"></div>
             </div>
 
             <div class="m-form-item">
               <label class="m-label"><span class="req">*</span>Payer-Zip Code：</label>
-              <div class="m-controls"><input type="text" value="1" disabled></div>
+              <div class="m-controls"><input type="text" value="1"></div>
             </div>
 
             <div class="m-form-item">
@@ -659,15 +660,6 @@
       if (ev === 'drop' && e.dataTransfer.files.length) {
         fileNameEl.textContent = '已选择：' + e.dataTransfer.files[0].name;
       }
-    });
-  });
-
-  /* BCI Code：聚焦时隐藏提示语，失焦且为空时恢复 */
-  document.querySelectorAll('input.hint-input').forEach(function (input) {
-    var tip = input.getAttribute('placeholder');
-    input.addEventListener('focus', function () { input.setAttribute('placeholder', ''); });
-    input.addEventListener('blur', function () {
-      if (!input.value) input.setAttribute('placeholder', tip);
     });
   });
 

@@ -114,10 +114,6 @@
     text-align: center; outline: none;
   }
 
-  /* 境内汇款代码：聚焦时隐藏灰色提示语 */
-  input.domestic-code::placeholder { color: rgba(0,0,0,.35); }
-  input.domestic-code:focus::placeholder { color: transparent; }
-
   /* ===== 付款账户详情弹窗 ===== */
   .detail-mask {
     position: fixed;
@@ -694,7 +690,8 @@
       <div class="form-item" id="aDomesticRow" style="display:none;">
         <label class="form-label">境内汇款代码：</label>
         <div class="form-controls">
-          <input type="text" class="domestic-code" placeholder="本地汇款需要提供，如BSBcode/Routing number/Sort Code等">
+          <input type="text">
+          <div class="form-tip">本地汇款需要提供,如BSBcode/Routing number/Sort Code等</div>
         </div>
       </div>
 
@@ -917,7 +914,8 @@
       <div class="form-item">
         <label class="form-label">境内汇款代码：</label>
         <div class="form-controls">
-          <input type="text" class="domestic-code" placeholder="本地汇款需要提供，如BSBcode/Routing number/Sort Code等">
+          <input type="text">
+          <div class="form-tip">本地汇款需要提供,如BSBcode/Routing number/Sort Code等</div>
         </div>
       </div>
 
@@ -1199,15 +1197,6 @@
   var eCountryNotice = document.getElementById('eCountryNotice');
   eCountry.addEventListener('change', function () {
     eCountryNotice.style.display = eCountry.value === '加拿大' ? '' : 'none';
-  });
-
-  /* 境内汇款代码：聚焦时隐藏提示语，失焦且为空时恢复 */
-  document.querySelectorAll('input.domestic-code').forEach(function (input) {
-    var tip = input.getAttribute('placeholder');
-    input.addEventListener('focus', function () { input.setAttribute('placeholder', ''); });
-    input.addEventListener('blur', function () {
-      if (!input.value) input.setAttribute('placeholder', tip);
-    });
   });
 
   /* 字数统计 */

@@ -147,22 +147,6 @@
   .gcf-combo .combo-list li.no-result { color: rgba(0,0,0,.45); cursor: default; }
   .gcf-combo .combo-list li.no-result:hover { background: transparent; color: rgba(0,0,0,.45); }
 
-  /* BCI Code 提示语：聚焦时隐藏 */
-  .gcf-form-controls input.hint-input::placeholder,
-  .dtl-value input.hint-input::placeholder { color: rgba(0,0,0,.35); }
-  .gcf-form-controls input.hint-input:focus::placeholder,
-  .dtl-value input.hint-input:focus::placeholder { color: transparent; }
-  .dtl-value input.hint-input {
-    width: 100%;
-    height: 30px;
-    padding: 0 8px;
-    border: 1px solid #d9d9d9;
-    border-radius: 4px;
-    font-size: 13px;
-    outline: none;
-  }
-  .dtl-value input.hint-input:focus { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,.12); }
-
   /* ===== 表格 ===== */
   .gcf-table-card {
     background: #fff;
@@ -741,7 +725,8 @@
             <div class="gcf-form-item" id="aBciRow" style="display:none;">
               <label class="gcf-form-label">BCI Code：</label>
               <div class="gcf-form-controls">
-                <input type="text" class="hint-input" placeholder="Bank Clearing Identifier: Routing number/sort code/BSB number, etc.">
+                <input type="text">
+                <div class="gcf-tip">Bank Clearing Identifier: Routing number/sort code/BSB number, etc.</div>
               </div>
             </div>
 
@@ -984,45 +969,46 @@
             <div class="gcf-form-item">
               <label class="gcf-form-label">BCI Code：</label>
               <div class="gcf-form-controls">
-                <input type="text" class="hint-input" placeholder="Bank Clearing Identifier: Routing number/sort code/BSB number, etc.">
+                <input type="text">
+                <div class="gcf-tip">Bank Clearing Identifier: Routing number/sort code/BSB number, etc.</div>
               </div>
             </div>
 
             <div class="gcf-form-item">
               <label class="gcf-form-label"><span class="req">*</span>Payer-Country/Region：</label>
               <div class="gcf-form-controls">
-                <select disabled><option selected>Canada</option></select>
+                <input type="text" value="Canada">
               </div>
             </div>
 
             <div class="gcf-form-item">
               <label class="gcf-form-label"><span class="req">*</span>Payer-Province/State：</label>
               <div class="gcf-form-controls">
-                <select disabled><option selected>Toronto</option></select>
+                <input type="text" value="Toronto">
               </div>
             </div>
 
             <div class="gcf-form-item">
               <label class="gcf-form-label"><span class="req">*</span>Payer-City：</label>
               <div class="gcf-form-controls">
-                <input type="text" value="1" disabled>
+                <input type="text" value="1">
                 <div class="gcf-tip">For corporate payers: Please fill in the city of the enterprise’s registered address. For individual payers: Please fill in the city stated on the individual’s ID card.</div>
               </div>
             </div>
 
             <div class="gcf-form-item">
               <label class="gcf-form-label"><span class="req">*</span>Payer-Street：</label>
-              <div class="gcf-form-controls"><input type="text" value="1" disabled></div>
+              <div class="gcf-form-controls"><input type="text" value="1"></div>
             </div>
 
             <div class="gcf-form-item">
               <label class="gcf-form-label"><span class="req">*</span>Payer-Unit/Civic No.：</label>
-              <div class="gcf-form-controls"><input type="text" value="1" disabled></div>
+              <div class="gcf-form-controls"><input type="text" value="1"></div>
             </div>
 
             <div class="gcf-form-item">
               <label class="gcf-form-label"><span class="req">*</span>Payer-Zip Code：</label>
-              <div class="gcf-form-controls"><input type="text" value="1" disabled></div>
+              <div class="gcf-form-controls"><input type="text" value="1"></div>
             </div>
 
             <div class="gcf-form-item">
@@ -1139,15 +1125,6 @@
       if (!combo.contains(e.target)) close();
     });
   })();
-
-  /* BCI Code：聚焦时隐藏提示语，失焦且为空时恢复 */
-  document.querySelectorAll('input.hint-input').forEach(function (input) {
-    var tip = input.getAttribute('placeholder');
-    input.addEventListener('focus', function () { input.setAttribute('placeholder', ''); });
-    input.addEventListener('blur', function () {
-      if (!input.value) input.setAttribute('placeholder', tip);
-    });
-  });
 
   /* 搜索 */
   function doSearch() {
