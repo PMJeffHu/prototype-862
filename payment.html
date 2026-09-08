@@ -680,6 +680,7 @@
                   <option>HK[Hong Kong]</option>
                   <option>US[United States]</option>
                   <option>SG[Singapore]</option>
+                  <option>AU[Austrilia]</option>
                 </select>
                 <div class="gcf-notice" id="countryNotice">
                   Notice :For domestic transactions within Canada, it is required that the payer provides the payee's address details. This information is essential as the bank account may be used for future refunds and thus should be submitted beforehand.
@@ -721,9 +722,9 @@
               </div>
             </div>
 
-            <!-- BCI Code（隐藏） -->
+            <!-- BCI Code（仅 AU[Austrilia] 显示且必填） -->
             <div class="gcf-form-item" id="aBciRow" style="display:none;">
-              <label class="gcf-form-label">BCI Code：</label>
+              <label class="gcf-form-label"><span class="req" id="aBciReq">*</span>BCI Code：</label>
               <div class="gcf-form-controls">
                 <input type="text">
                 <div class="gcf-tip">Bank Clearing Identifier: Routing number/sort code/BSB number, etc.</div>
@@ -1199,8 +1200,10 @@
       /* CN：显示 Bank Union Code、隐藏 Swift Code；其他国家相反 */
       show('aUnionRow', isCN);
       show('aSwiftRow', !isCN);
-      /* BCI Code 始终隐藏 */
-      show('aBciRow', false);
+      /* AU[Austrilia]：显示 BCI Code 并必填（加星号）；其他国家隐藏 */
+      var isAU = v === 'AU[Austrilia]';
+      show('aBciRow', isAU);
+      show('aBciReq', isAU);
     }
     aCountry.addEventListener('change', sync);
     sync();

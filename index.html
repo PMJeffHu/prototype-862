@@ -885,6 +885,7 @@
             <option>中国香港</option>
             <option>美国</option>
             <option>新加坡</option>
+            <option>澳大利亚</option>
           </select>
           <div class="form-warning" id="eCountryNotice">加拿大当地付款时需要打款人提供收款人地址信息。此银行未来可能用于接收退款，因此需要提前提供。</div>
         </div>
@@ -897,22 +898,22 @@
         </div>
       </div>
 
-      <div class="form-item">
+      <div class="form-item" id="eUnionRow">
         <label class="form-label"><span class="req">*</span>联行号：</label>
         <div class="form-controls">
           <input type="text" id="eUnionCode">
         </div>
       </div>
 
-      <div class="form-item">
+      <div class="form-item" id="eSwiftRow">
         <label class="form-label"><span class="req">*</span>Swift Code：</label>
         <div class="form-controls">
           <input type="text" id="eSwift" value="BKCHCAT2XXX">
         </div>
       </div>
 
-      <div class="form-item">
-        <label class="form-label">境内汇款代码：</label>
+      <div class="form-item" id="eDomesticRow">
+        <label class="form-label"><span class="req" id="eDomesticReq" style="display:none;">*</span>境内汇款代码：</label>
         <div class="form-controls">
           <input type="text">
           <div class="form-tip">本地汇款需要提供,如BSBcode/Routing number/Sort Code等</div>
@@ -950,7 +951,7 @@
         </div>
       </div>
 
-      <div class="form-item">
+      <div class="form-item" id="eStreetRow">
         <label class="form-label"><span class="req">*</span>付款方街道：</label>
         <div class="form-controls">
           <div class="input-wrap">
@@ -960,7 +961,7 @@
         </div>
       </div>
 
-      <div class="form-item">
+      <div class="form-item" id="eBuildingRow">
         <label class="form-label"><span class="req">*</span>付款方建筑号：</label>
         <div class="form-controls">
           <div class="input-wrap">
@@ -970,7 +971,7 @@
         </div>
       </div>
 
-      <div class="form-item">
+      <div class="form-item" id="eZipRow">
         <label class="form-label"><span class="req">*</span>付款方邮编：</label>
         <div class="form-controls">
           <div class="input-wrap">
@@ -1048,6 +1049,12 @@
       <div class="dtl-row"><span class="dtl-label">联行号：</span><span class="dtl-value">--</span></div>
       <div class="dtl-row"><span class="dtl-label">Swift Code：</span><span class="dtl-value">ING6520XX</span></div>
       <div class="dtl-row"><span class="dtl-label">境内汇款代码：</span><span class="dtl-value">--</span></div>
+      <div class="dtl-row"><span class="dtl-label">付款方国家/地区：</span><span class="dtl-value">--</span></div>
+      <div class="dtl-row"><span class="dtl-label">付款方省/州：</span><span class="dtl-value">--</span></div>
+      <div class="dtl-row"><span class="dtl-label">付款方城市：</span><span class="dtl-value">--</span></div>
+      <div class="dtl-row"><span class="dtl-label">付款方街道：</span><span class="dtl-value">--</span></div>
+      <div class="dtl-row"><span class="dtl-label">付款方建筑号：</span><span class="dtl-value">--</span></div>
+      <div class="dtl-row"><span class="dtl-label">付款方邮编：</span><span class="dtl-value">--</span></div>
       <div class="dtl-row"><span class="dtl-label">币种：</span><span class="dtl-value" id="dCurrency">--</span></div>
       <div class="dtl-row"><span class="dtl-label">委托关系<span class="info">i</span>：</span><span class="dtl-value" id="dEntrust">--</span></div>
       <div class="dtl-row"><span class="dtl-label">委托付款源：</span><span class="dtl-value">--</span></div>
@@ -1192,12 +1199,38 @@
     if (e.target === editModal) closeEdit();
   });
 
-  /* 开户行国家/地区提示联动（仅加拿大显示） */
+  /* ===== 编辑弹窗：开户行国家/地区字段联动 ===== */
   var eCountry = document.getElementById('eCountry');
   var eCountryNotice = document.getElementById('eCountryNotice');
-  eCountry.addEventListener('change', function () {
-    eCountryNotice.style.display = eCountry.value === '加拿大' ? '' : 'none';
-  });
+
+  function eShow(id, visible) {
+    var el = document.getElementById(id);
+    if (el) el.style.display = visible ? '' : 'none';
+  }
+  function syncEditCountry() {
+    if (!eCountry) return;
+    var v = eCountry.value;
+    var isCN = v === '中国';
+    var isAU = v === '澳大利亚';
+    var isCA = v === '加拿大';
+
+    /* 加拿大提示文案 */
+    eShow('eCountryNotice', isCA);
+    /* 中国：隐藏 Swift Code、境内汇款代码；非中国：隐藏联行号 */
+    eShow('eSwiftRow', !isCN);
+    eShow('eDomesticRow', !isCN);
+    eShow('eUnionRow', isCN);
+    /* 澳大利亚：境内汇款代码必填（加星号） */
+    eShow('eDomesticReq', isAU);
+    /* 加拿大：展示付款方街道/建筑号/邮编 */
+    eShow('eStreetRow', isCA);
+    eShow('eBuildingRow', isCA);
+    eShow('eZipRow', isCA);
+  }
+  if (eCountry) {
+    eCountry.addEventListener('change', syncEditCountry);
+    syncEditCountry();
+  }
 
   /* 字数统计 */
   document.querySelectorAll('.input-wrap').forEach(function (wrap) {
