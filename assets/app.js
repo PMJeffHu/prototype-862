@@ -8,7 +8,7 @@
  */
 (function () {
   var PAGES = {
-    maintain: { icon: '\u{1F6E0}', text: 'GD-付款账号维护', href: 'maintain.html', tab: '付款账号维护' },
+    maintain: { icon: '\u{1F6E0}', text: 'GD/GCF-付款账号维护', href: 'maintain.html', tab: '付款账号维护' },
     list:     { icon: '\u{1F4B3}', text: 'GD-付款账户列表', href: 'index.html',   tab: '付款账户列表' },
     refund:   { icon: '↩️',        text: 'GD-客户退款',     href: 'refund.html',  tab: '客户退款-新增' },
     payment:  { icon: '\u{1F4B0}', text: 'GCF-Payment',     href: 'payment.html', tab: 'GCF-Payment' },
@@ -137,8 +137,9 @@
     var scripts = Array.prototype.filter.call(doc.querySelectorAll('script'), function (s) {
       return !s.src && s.getAttribute('data-page') === null;
     }).map(function (s) { return s.textContent; });
-    /* .page 之外的弹窗（.modal-mask）也一并注入，保证单页切换后弹窗可用 */
-    var extras = Array.prototype.map.call(doc.querySelectorAll('.modal-mask'), function (m) {
+    /* .page 之外的弹窗（mask 层）也一并注入，保证单页切换后弹窗可用
+       覆盖 modal-mask / detail-mask / fu-mask 等各类弹窗容器 */
+    var extras = Array.prototype.map.call(doc.querySelectorAll('[class*="mask"]'), function (m) {
       return m.outerHTML;
     }).join('');
     return { html: (page ? page.outerHTML : '') + extras, styles: styles, scripts: scripts };

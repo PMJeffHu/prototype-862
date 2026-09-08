@@ -1095,9 +1095,11 @@
   document.getElementById('modalOk').addEventListener('click', function () {
     addModal.classList.remove('open');
   });
-  addModal.addEventListener('click', function (e) {
-    if (e.target === addModal) addModal.classList.remove('open');
-  });
+  if (addModal) {
+    addModal.addEventListener('click', function (e) {
+      if (e.target === addModal) addModal.classList.remove('open');
+    });
+  }
 
   /* ===== 付款账户详情弹窗：点击「详情」按行填充 ===== */
   var detailModal = document.getElementById('detailModal');
@@ -1125,10 +1127,13 @@
       openDetail(a.closest('tr'));
     });
   });
-  document.getElementById('detailCloseBtn').addEventListener('click', closeDetail);
-  detailModal.addEventListener('click', function (e) {
-    if (e.target === detailModal) closeDetail();
-  });
+  if (detailModal) {
+    var detailClose = document.getElementById('detailCloseBtn');
+    if (detailClose) detailClose.addEventListener('click', closeDetail);
+    detailModal.addEventListener('click', function (e) {
+      if (e.target === detailModal) closeDetail();
+    });
+  }
 
   /* ===== 编辑付款账户弹窗：点击「编辑」按行填充 ===== */
   var editModal = document.getElementById('editModal');
@@ -1164,9 +1169,10 @@
       openEdit(a.closest('tr'));
     });
   });
-  document.getElementById('editCloseBtn').addEventListener('click', closeEdit);
-  document.getElementById('editCancelBtn').addEventListener('click', closeEdit);
-  document.getElementById('editSubmitBtn').addEventListener('click', closeEdit);
+  ['editCloseBtn', 'editCancelBtn', 'editSubmitBtn'].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('click', closeEdit);
+  });
   editModal.addEventListener('click', function (e) {
     if (e.target === editModal) closeEdit();
   });
