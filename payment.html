@@ -953,14 +953,29 @@
             <div class="gcf-form-item">
               <label class="gcf-form-label"><span class="req">*</span>Country/Region of Account：</label>
               <div class="gcf-form-controls">
-                <select disabled><option selected>CA[Canada]</option></select>
+                <select id="editCountryRegion">
+                  <option selected>CA[Canada]</option>
+                  <option>CN[China]</option>
+                  <option>HK[Hong Kong]</option>
+                  <option>US[United States]</option>
+                  <option>SG[Singapore]</option>
+                  <option>AU[Austrilia]</option>
+                </select>
                 <div class="gcf-notice">
                   Notice :For domestic transactions within Canada, it is required that the payer provides the payee's address details. This information is essential as the bank account may be used for future refunds and thus should be submitted beforehand.
                 </div>
               </div>
             </div>
 
-            <div class="gcf-form-item">
+            <!-- Bank Union Code（仅 CN 显示，值不可修改） -->
+            <div class="gcf-form-item" id="editUnionRow">
+              <label class="gcf-form-label">Bank Union Code：</label>
+              <div class="gcf-form-controls">
+                <input type="text" value="200200200200" disabled>
+              </div>
+            </div>
+
+            <div class="gcf-form-item" id="editSwiftRow">
               <label class="gcf-form-label"><span class="req">*</span>Swift Code：</label>
               <div class="gcf-form-controls">
                 <input type="text" value="BKCHCAT2XXX">
@@ -968,7 +983,7 @@
             </div>
 
             <div class="gcf-form-item">
-              <label class="gcf-form-label">BCI Code：</label>
+              <label class="gcf-form-label"><span class="req" id="editBciReq" style="display:none;">*</span>BCI Code：</label>
               <div class="gcf-form-controls">
                 <input type="text">
                 <div class="gcf-tip">Bank Clearing Identifier: Routing number/sort code/BSB number, etc.</div>
@@ -1005,17 +1020,17 @@
               </div>
             </div>
 
-            <div class="gcf-form-item">
+            <div class="gcf-form-item" id="editStreetRow">
               <label class="gcf-form-label"><span class="req">*</span>Payer-Street：</label>
               <div class="gcf-form-controls"><input type="text" value="1"></div>
             </div>
 
-            <div class="gcf-form-item">
+            <div class="gcf-form-item" id="editUnitRow">
               <label class="gcf-form-label"><span class="req">*</span>Payer-Unit/Civic No.：</label>
               <div class="gcf-form-controls"><input type="text" value="1"></div>
             </div>
 
-            <div class="gcf-form-item">
+            <div class="gcf-form-item" id="editZipRow">
               <label class="gcf-form-label"><span class="req">*</span>Payer-Zip Code：</label>
               <div class="gcf-form-controls"><input type="text" value="1"></div>
             </div>
@@ -1214,6 +1229,33 @@
       show('aBciReq', isAU);
     }
     aCountry.addEventListener('change', sync);
+    sync();
+  })();
+
+  /* ===== Edit 弹窗：Country/Region of Account 字段联动 ===== */
+  (function () {
+    var editCountry = document.getElementById('editCountryRegion');
+    if (!editCountry) return;
+    function show(id, visible) {
+      var el = document.getElementById(id);
+      if (el) el.style.display = visible ? '' : 'none';
+    }
+    function sync() {
+      var v = editCountry.value;
+      var isCN = v === 'CN[China]';
+      var isAU = v === 'AU[Austrilia]';
+      var isCA = v === 'CA[Canada]';
+      /* CN：展示 Bank Union Code（不可修改）、隐藏 Swift Code；非 CN 相反 */
+      show('editUnionRow', isCN);
+      show('editSwiftRow', !isCN);
+      /* AU：BCI Code 必填（加星号），其他值非必填 */
+      show('editBciReq', isAU);
+      /* CA：展示 Payer-Street / Payer-Unit/Civic No. / Payer-Zip Code（必填） */
+      show('editStreetRow', isCA);
+      show('editUnitRow', isCA);
+      show('editZipRow', isCA);
+    }
+    editCountry.addEventListener('change', sync);
     sync();
   })();
 

@@ -318,6 +318,14 @@ body.col-resizing { cursor: col-resize; user-select: none; }
 }
 .m-btn-confirm:hover { background: #1d4ed8; }
 
+/* ===== 字段打标：[优] 标记 + 值深绿色 ===== */
+.mark-you { color: #0f7a3d; font-size: 12px; margin-left: 3px; }
+.val-green input[type="text"],
+.val-green select,
+.val-green textarea { color: #0f7a3d; }
+.val-green .dtl-value,
+.val-green .dtl-value * { color: #0f7a3d; }
+
 /* ===== 通用卡片 / 空状态 ===== */
 .card {
   background: #fff;

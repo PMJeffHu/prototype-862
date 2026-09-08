@@ -75,6 +75,15 @@
   pageStyleEl.id = 'pageStyle';
   document.head.appendChild(pageStyleEl);
 
+  /* ---------- 字段打标：[优] 标记所在行 -> 值变深绿 ---------- */
+  function markFields() {
+    Array.prototype.forEach.call(document.querySelectorAll('.mark-you'), function (mark) {
+      var label = mark.closest('label, .dtl-label, .form-label, .gcf-form-label, .m-label');
+      var row = label ? label.closest('.form-item, .gcf-form-item, .m-form-item, .dtl-row, .dtl-item') : null;
+      if (row) row.classList.add('val-green');
+    });
+  }
+
   /* ---------- 表格列宽拖拽 ---------- */
   function enhanceTables(root) {
     var tables = (root || document).querySelectorAll('table');
@@ -168,6 +177,9 @@
 
     /* 为表格加上列宽拖拽 */
     enhanceTables(contentEl);
+
+    /* 字段打标：[优] 标记行的值变深绿 */
+    markFields();
 
     /* 执行页面脚本（首屏脚本已被浏览器执行过，跳过） */
     if (execScripts !== false) {

@@ -478,14 +478,29 @@
             <div class="m-form-item">
               <label class="m-label"><span class="req">*</span>Country/Region of Account：</label>
               <div class="m-controls">
-                <select disabled><option selected>CA[Canada]</option></select>
+                <select id="wCountryRegion">
+                  <option selected>CA[Canada]</option>
+                  <option>CN[China]</option>
+                  <option>HK[Hong Kong]</option>
+                  <option>US[United States]</option>
+                  <option>SG[Singapore]</option>
+                  <option>AU[Austrilia]</option>
+                </select>
                 <div class="m-notice">
                   Notice :For domestic transactions within Canada, it is required that the payer provides the payee's address details. This information is essential as the bank account may be used for future refunds and thus should be submitted beforehand.
                 </div>
               </div>
             </div>
 
-            <div class="m-form-item">
+            <!-- Bank Union Code（仅 CN 显示，值不可修改） -->
+            <div class="m-form-item" id="wUnionRow">
+              <label class="m-label">Bank Union Code：</label>
+              <div class="m-controls">
+                <input type="text" value="200200200200" disabled>
+              </div>
+            </div>
+
+            <div class="m-form-item" id="wSwiftRow">
               <label class="m-label"><span class="req">*</span>Swift Code：</label>
               <div class="m-controls">
                 <input type="text" value="BKCHCAT2XXX">
@@ -493,7 +508,7 @@
             </div>
 
             <div class="m-form-item">
-              <label class="m-label">BCI Code：</label>
+              <label class="m-label"><span class="req" id="wBciReq" style="display:none;">*</span>BCI Code：</label>
               <div class="m-controls">
                 <input type="text">
                 <div class="m-tip">Bank Clearing Identifier: Routing number/sort code/BSB number, etc.</div>
@@ -503,12 +518,13 @@
             <div class="m-form-item">
               <label class="m-label"><span class="req">*</span>Payer-Country/Region：</label>
               <div class="m-controls">
-                <select>
+                <select id="wPayerCountry">
                   <option selected></option>
                   <option>CA[Canada]</option>
                   <option>CN[China]</option>
                   <option>HK[Hong Kong]</option>
                   <option>US[United States]</option>
+                  <option>AU[Austrilia]</option>
                 </select>
               </div>
             </div>
@@ -524,20 +540,23 @@
 
             <div class="m-form-item">
               <label class="m-label"><span class="req">*</span>Payer-City：</label>
-              <div class="m-controls"><input type="text" value="1"></div>
+              <div class="m-controls">
+                <input type="text" value="1">
+                <div class="m-tip">For corporate payers: Please fill in the city of the enterprise’s registered address. For individual payers: Please fill in the city stated on the individual’s ID card.</div>
+              </div>
             </div>
 
-            <div class="m-form-item">
+            <div class="m-form-item" id="wStreetRow">
               <label class="m-label"><span class="req">*</span>Payer-Street：</label>
               <div class="m-controls"><input type="text" value="1"></div>
             </div>
 
-            <div class="m-form-item">
+            <div class="m-form-item" id="wUnitRow">
               <label class="m-label"><span class="req">*</span>Payer-Unit/Civic No.：</label>
               <div class="m-controls"><input type="text" value="1"></div>
             </div>
 
-            <div class="m-form-item">
+            <div class="m-form-item" id="wZipRow">
               <label class="m-label"><span class="req">*</span>Payer-Zip Code：</label>
               <div class="m-controls"><input type="text" value="1"></div>
             </div>
@@ -670,6 +689,33 @@
       }
     });
   });
+
+  /* ===== Edit 弹窗：Country/Region of Account 字段联动 ===== */
+  (function () {
+    var editCountry = document.getElementById('wCountryRegion');
+    if (!editCountry) return;
+    function show(id, visible) {
+      var el = document.getElementById(id);
+      if (el) el.style.display = visible ? '' : 'none';
+    }
+    function sync() {
+      var v = editCountry.value;
+      var isCN = v === 'CN[China]';
+      var isAU = v === 'AU[Austrilia]';
+      var isCA = v === 'CA[Canada]';
+      /* CN：展示 Bank Union Code（不可修改）、隐藏 Swift Code；非 CN 相反 */
+      show('wUnionRow', isCN);
+      show('wSwiftRow', !isCN);
+      /* AU：BCI Code 必填（加星号），其他值非必填 */
+      show('wBciReq', isAU);
+      /* CA：展示 Payer-Street / Payer-Unit/Civic No. / Payer-Zip Code（必填） */
+      show('wStreetRow', isCA);
+      show('wUnitRow', isCA);
+      show('wZipRow', isCA);
+    }
+    editCountry.addEventListener('change', sync);
+    sync();
+  })();
 
   /* ===== Edit Payment Account 弹窗：点击收款账户表格的 Edit 打开 ===== */
   var editModal = document.getElementById('editPaymentModal');
