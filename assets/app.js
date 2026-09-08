@@ -8,13 +8,14 @@
  */
 (function () {
   var PAGES = {
+    maintain: { icon: '\u{1F6E0}', text: 'GD-付款账号维护', href: 'maintain.html', tab: '付款账号维护' },
     list:     { icon: '\u{1F4B3}', text: 'GD-付款账户列表', href: 'index.html',   tab: '付款账户列表' },
     refund:   { icon: '↩️',        text: 'GD-客户退款',     href: 'refund.html',  tab: '客户退款-新增' },
     payment:  { icon: '\u{1F4B0}', text: 'GCF-Payment',     href: 'payment.html', tab: 'GCF-Payment' },
     withdraw: { icon: '\u{1F3E7}', text: 'GCF-Withdraw',    href: 'withdraw.html', tab: 'GCF-Withdraw' },
     fps:      { icon: '\u{1F4B8}', text: 'FPS-应付结算',    href: 'fps.html',     tab: 'FPS-应付结算' }
   };
-  var ORDER = ['list', 'refund', 'payment', 'withdraw', 'fps'];
+  var ORDER = ['maintain', 'list', 'refund', 'payment', 'withdraw', 'fps'];
 
   var script = document.currentScript || document.querySelector('script[data-page]');
   var homeKey = script ? (script.getAttribute('data-page') || 'list') : 'list';

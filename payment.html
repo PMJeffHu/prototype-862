@@ -715,7 +715,7 @@
             </div>
 
             <!-- Bank Union Code -->
-            <div class="gcf-form-item">
+            <div class="gcf-form-item" id="aUnionRow">
               <label class="gcf-form-label">Bank Union Code：</label>
               <div class="gcf-form-controls">
                 <input type="text" value="200200200200" disabled>
@@ -723,15 +723,15 @@
             </div>
 
             <!-- Swift Code -->
-            <div class="gcf-form-item">
+            <div class="gcf-form-item" id="aSwiftRow">
               <label class="gcf-form-label"><span class="req">*</span>Swift Code：</label>
               <div class="gcf-form-controls">
                 <input type="text">
               </div>
             </div>
 
-            <!-- BCI Code -->
-            <div class="gcf-form-item">
+            <!-- BCI Code（隐藏） -->
+            <div class="gcf-form-item" id="aBciRow" style="display:none;">
               <label class="gcf-form-label">BCI Code：</label>
               <div class="gcf-form-controls">
                 <input type="text" class="hint-input" placeholder="Bank Clearing Identifier: Routing number/sort code/BSB number, etc.">
@@ -771,7 +771,7 @@
             </div>
 
             <!-- Payer-Street -->
-            <div class="gcf-form-item">
+            <div class="gcf-form-item" id="aStreetRow">
               <label class="gcf-form-label"><span class="req">*</span>Payer-Street：</label>
               <div class="gcf-form-controls">
                 <input type="text">
@@ -779,7 +779,7 @@
             </div>
 
             <!-- Payer-Unit/Civic No. -->
-            <div class="gcf-form-item">
+            <div class="gcf-form-item" id="aUnitRow">
               <label class="gcf-form-label"><span class="req">*</span>Payer-Unit/Civic No.：</label>
               <div class="gcf-form-controls">
                 <input type="text">
@@ -787,7 +787,7 @@
             </div>
 
             <!-- Payer-Zip Code -->
-            <div class="gcf-form-item">
+            <div class="gcf-form-item" id="aZipRow">
               <label class="gcf-form-label"><span class="req">*</span>Payer-Zip Code：</label>
               <div class="gcf-form-controls">
                 <input type="text">
@@ -981,36 +981,36 @@
             </div>
 
             <div class="gcf-form-item">
-              <label class="gcf-form-label"><span class="req">*</span>Address - Country/Region：</label>
+              <label class="gcf-form-label"><span class="req">*</span>Payer-Country/Region：</label>
               <div class="gcf-form-controls">
                 <select disabled><option selected>Canada</option></select>
               </div>
             </div>
 
             <div class="gcf-form-item">
-              <label class="gcf-form-label"><span class="req">*</span>Address - Province/State：</label>
+              <label class="gcf-form-label"><span class="req">*</span>Payer-Province/State：</label>
               <div class="gcf-form-controls">
                 <select disabled><option selected>Toronto</option></select>
               </div>
             </div>
 
             <div class="gcf-form-item">
-              <label class="gcf-form-label"><span class="req">*</span>Address-City：</label>
+              <label class="gcf-form-label"><span class="req">*</span>Payer-City：</label>
               <div class="gcf-form-controls"><input type="text" value="1" disabled></div>
             </div>
 
             <div class="gcf-form-item">
-              <label class="gcf-form-label"><span class="req">*</span>Address-Street：</label>
+              <label class="gcf-form-label"><span class="req">*</span>Payer-Street：</label>
               <div class="gcf-form-controls"><input type="text" value="1" disabled></div>
             </div>
 
             <div class="gcf-form-item">
-              <label class="gcf-form-label"><span class="req">*</span>Address-Unit/Civic No.：</label>
+              <label class="gcf-form-label"><span class="req">*</span>Payer-Unit/Civic No.：</label>
               <div class="gcf-form-controls"><input type="text" value="1" disabled></div>
             </div>
 
             <div class="gcf-form-item">
-              <label class="gcf-form-label"><span class="req">*</span>Address-Zip Code：</label>
+              <label class="gcf-form-label"><span class="req">*</span>Payer-Zip Code：</label>
               <div class="gcf-form-controls"><input type="text" value="1" disabled></div>
             </div>
 
@@ -1191,6 +1191,32 @@
   addModal.addEventListener('click', function (e) {
     if (e.target === addModal) closeModal();
   });
+
+  /* ===== Add New 弹窗：Country/Region of Account 字段联动 ===== */
+  (function () {
+    var aCountry = document.getElementById('acctCountry');
+    if (!aCountry) return;
+    function show(id, visible) {
+      var el = document.getElementById(id);
+      if (el) el.style.display = visible ? '' : 'none';
+    }
+    function sync() {
+      var v = aCountry.value;
+      var isCA = v === 'CA[Canada]';
+      var isCN = v === 'CN[China]';
+      /* 非 CA：隐藏 Payer-Street / Payer-Unit/Civic No. / Payer-Zip Code */
+      show('aStreetRow', isCA);
+      show('aUnitRow', isCA);
+      show('aZipRow', isCA);
+      /* CN：显示 Bank Union Code、隐藏 Swift Code；其他国家相反 */
+      show('aUnionRow', isCN);
+      show('aSwiftRow', !isCN);
+      /* BCI Code 始终隐藏 */
+      show('aBciRow', false);
+    }
+    aCountry.addEventListener('change', sync);
+    sync();
+  })();
 
   /* 国家/地区切换提示文案 */
   var countrySel = document.getElementById('acctCountry');

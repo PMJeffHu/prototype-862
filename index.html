@@ -644,7 +644,7 @@
       <div class="form-item">
         <label class="form-label"><span class="req">*</span>开户行国家/地区：</label>
         <div class="form-controls">
-          <select>
+          <select id="aCountry">
             <option selected>加拿大</option>
             <option>中国</option>
             <option>中国香港</option>
@@ -664,7 +664,7 @@
       </div>
 
       <!-- 联行号 -->
-      <div class="form-item">
+      <div class="form-item" id="aUnionRow">
         <label class="form-label"><span class="req">*</span>联行号：</label>
         <div class="form-controls">
           <input type="text">
@@ -672,15 +672,15 @@
       </div>
 
       <!-- Swift Code -->
-      <div class="form-item">
+      <div class="form-item" id="aSwiftRow">
         <label class="form-label"><span class="req">*</span>Swift Code：</label>
         <div class="form-controls">
           <input type="text">
         </div>
       </div>
 
-      <!-- 境内汇款代码 -->
-      <div class="form-item">
+      <!-- 境内汇款代码（隐藏） -->
+      <div class="form-item" id="aDomesticRow" style="display:none;">
         <label class="form-label">境内汇款代码：</label>
         <div class="form-controls">
           <input type="text" class="domestic-code" placeholder="本地汇款需要提供，如BSBcode/Routing number/Sort Code等">
@@ -722,7 +722,7 @@
       </div>
 
       <!-- 付款方街道名 -->
-      <div class="form-item">
+      <div class="form-item" id="aStreetRow">
         <label class="form-label"><span class="req">*</span>付款方街道名：</label>
         <div class="form-controls">
           <div class="input-wrap">
@@ -733,7 +733,7 @@
       </div>
 
       <!-- 付款方建筑号 -->
-      <div class="form-item">
+      <div class="form-item" id="aBuildingRow">
         <label class="form-label"><span class="req">*</span>付款方建筑号：</label>
         <div class="form-controls">
           <div class="input-wrap">
@@ -744,7 +744,7 @@
       </div>
 
       <!-- 付款方邮编 -->
-      <div class="form-item">
+      <div class="form-item" id="aZipRow">
         <label class="form-label"><span class="req">*</span>付款方邮编：</label>
         <div class="form-controls">
           <div class="input-wrap">
@@ -1047,6 +1047,40 @@
 
 <script src="assets/app.js" data-page="list"></script>
 <script>
+  /* ===== 新增付款账户弹窗：开户行国家/地区联动 ===== */
+  (function () {
+    var aCountry = document.getElementById('aCountry');
+    if (!aCountry) return;
+    var ids = {
+      street: 'aStreetRow',
+      building: 'aBuildingRow',
+      zip: 'aZipRow',
+      union: 'aUnionRow',
+      swift: 'aSwiftRow',
+      domestic: 'aDomesticRow'
+    };
+    function show(id, visible) {
+      var el = document.getElementById(id);
+      if (el) el.style.display = visible ? '' : 'none';
+    }
+    function sync() {
+      var v = aCountry.value;
+      var isCA = v === '加拿大';
+      var isCN = v === '中国';
+      /* 非加拿大：隐藏付款方街道名/建筑号/邮编 */
+      show(ids.street, isCA);
+      show(ids.building, isCA);
+      show(ids.zip, isCA);
+      /* 中国：显示联行号、隐藏 Swift Code；其他国家相反 */
+      show(ids.union, isCN);
+      show(ids.swift, !isCN);
+      /* 境内汇款代码始终隐藏 */
+      show(ids.domestic, false);
+    }
+    aCountry.addEventListener('change', sync);
+    sync();
+  })();
+
   /* ===== 新增付款账户弹窗 ===== */
   var addModal = document.getElementById('addModal');
   document.getElementById('addBtn').addEventListener('click', function () {

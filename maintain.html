@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>付款账号维护</title>
+<link rel="stylesheet" href="assets/common.css">
+<style>
+  /* ===== 维护提示卡片 ===== */
+  .mt-wrap {
+    min-height: calc(100vh - 120px);
+    background: #d9d9d9;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 48px 16px;
+  }
+  .mt-card {
+    width: 680px;
+    max-width: 100%;
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 6px 20px rgba(0,0,0,.2);
+    overflow: hidden;
+  }
+  .mt-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 20px;
+  }
+  .mt-header .mt-title { font-size: 15px; font-weight: 600; color: rgba(0,0,0,.9); }
+  .mt-close {
+    position: absolute;
+    right: 14px; top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    font-size: 18px;
+    color: rgba(0,0,0,.55);
+    cursor: pointer;
+    width: 28px; height: 28px;
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .mt-close:hover { background: #f0f0f0; color: rgba(0,0,0,.85); }
+
+  .mt-body {
+    padding: 10px 28px 18px;
+    font-size: 13px;
+    line-height: 2;
+    color: rgba(0,0,0,.85);
+  }
+  .mt-body .hl { color: #2563eb; cursor: pointer; }
+
+  .mt-footer {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    padding: 6px 20px 22px;
+  }
+  .mt-btn {
+    height: 30px;
+    padding: 0 18px;
+    border-radius: 3px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .mt-btn-later {
+    background: #fff;
+    border: 1px solid #91caff;
+    color: #2563eb;
+  }
+  .mt-btn-later:hover { border-color: #2563eb; }
+  .mt-btn-view {
+    background: #2563eb;
+    border: 1px solid #2563eb;
+    color: #fff;
+  }
+  .mt-btn-view:hover { background: #1d4ed8; }
+
+  /* ===== 账户列表表格 ===== */
+  .mt-table-wrap {
+    display: none;
+    background: #fff;
+    border-radius: 2px;
+    padding: 12px 16px 16px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.03);
+    overflow-x: auto;
+  }
+  .mt-table-wrap.show { display: block; }
+  .mt-table { width: 100%; border-collapse: collapse; min-width: 860px; }
+  .mt-table th {
+    background: #fafafa;
+    text-align: left;
+    font-weight: 500;
+    color: rgba(0,0,0,.85);
+    padding: 10px 10px;
+    border-bottom: 1px solid #f0f0f0;
+    white-space: nowrap;
+  }
+  .mt-table td {
+    padding: 10px 10px;
+    border-bottom: 1px solid #f0f0f0;
+    color: rgba(0,0,0,.75);
+    word-break: break-all;
+  }
+  .mt-table tbody tr:hover td { background: #fafafa; }
+  .mt-table a { color: #1890ff; text-decoration: none; cursor: pointer; }
+  .mt-table a:hover { color: #40a9ff; }
+
+  /* 关闭卡片后的占位 */
+  .mt-empty { display: none; }
+  .mt-wrap.closed .mt-card { display: none; }
+  .mt-wrap.closed { background: transparent; align-items: center; min-height: 480px; }
+  .mt-wrap.closed + .mt-empty, .mt-empty.show { display: block; }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- 侧边栏（由 assets/app.js 渲染） -->
+  <aside class="sider" id="sider"></aside>
+
+  <div class="main">
+
+    <header class="header" id="appHeader"></header>
+
+    <div class="tabs" id="appTabs"></div>
+
+    <div id="appContent">
+    <div class="page">
+
+      <!-- 付款资料维护 提示卡片 -->
+      <div class="mt-wrap" id="mtWrap">
+        <div class="mt-card">
+          <div class="mt-header">
+            <span class="mt-title">付款资料维护</span>
+            <button class="mt-close" id="mtCloseBtn" title="关闭">×</button>
+          </div>
+          <div class="mt-body">
+            尊敬的客户，您好！根据 SWIFT ISO 20022（CBPR+）跨境支付新规，近期聚合付款账户模块升级，系统定位到贵司该付款账户需要补充付款人城市信息，请根据系统提示补充对应资料。请在10月31日之前完成上述操作，以免系统升级影响该付款账户正常使用，带来不便，敬请谅解。
+          </div>
+          <div class="mt-footer">
+            <button class="mt-btn mt-btn-later" id="mtLaterBtn">下次提醒</button>
+            <button class="mt-btn mt-btn-view" id="mtViewBtn">查看</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 付款账户列表（点击「查看」后展示） -->
+      <div class="mt-table-wrap" id="mtTableWrap">
+        <table class="mt-table">
+          <colgroup>
+            <col style="width:16%"><col style="width:9%"><col style="width:11%">
+            <col style="width:16%"><col style="width:22%"><col style="width:7%">
+            <col style="width:7%">
+          </colgroup>
+          <thead>
+            <tr>
+              <th>账户名称</th>
+              <th>银行</th>
+              <th>账号</th>
+              <th>币别/币种</th>
+              <th>充值账户</th>
+              <th>状态</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="mtTableBody"></tbody>
+        </table>
+      </div>
+
+      <!-- 关闭卡片后的占位 -->
+      <div class="empty-state mt-empty" id="mtEmpty">
+        <div class="es-icon">🛠️</div>
+        <div class="es-title">付款账号维护</div>
+        <div>当前暂无待维护事项。您可在右侧提示弹窗关闭前通过「查看」进入付款账户列表补充资料。</div>
+      </div>
+
+    </div>
+    </div><!-- /#appContent -->
+
+  </div><!-- /.main -->
+</div><!-- /.layout -->
+
+<script src="assets/app.js" data-page="maintain"></script>
+<script>
+  var mtWrap = document.getElementById('mtWrap');
+  var mtEmpty = document.getElementById('mtEmpty');
+
+  function closeCard() {
+    mtWrap.classList.add('closed');
+    mtEmpty.classList.add('show');
+  }
+
+  /* 下次提醒 / ×：关闭卡片 */
+  document.getElementById('mtLaterBtn').addEventListener('click', closeCard);
+  document.getElementById('mtCloseBtn').addEventListener('click', closeCard);
+
+  /* ===== 查看：加载付款账户列表数据并展示表格 ===== */
+  var mtTableWrap = document.getElementById('mtTableWrap');
+  var mtTableBody = document.getElementById('mtTableBody');
+  var indexHtmlPromise = null;
+
+  function fetchIndexHtml() {
+    if (!indexHtmlPromise) {
+      indexHtmlPromise = fetch('index.html', { cache: 'no-store' }).then(function (r) { return r.text(); });
+    }
+    return indexHtmlPromise;
+  }
+
+  /* 复用付款账户列表的「编辑付款账户」弹窗，保证内容一致 */
+  function loadEditModal() {
+    if (document.getElementById('editModal')) return Promise.resolve();
+    return fetchIndexHtml().then(function (html) {
+      var doc = new DOMParser().parseFromString(html, 'text/html');
+      var modal = doc.getElementById('editModal');
+      if (!modal) return;
+      var st = document.createElement('style');
+      st.textContent = Array.prototype.map.call(doc.querySelectorAll('style'), function (s) {
+        return s.textContent;
+      }).join('\n');
+      document.head.appendChild(st);
+      document.body.appendChild(modal);
+      bindEditModal();
+    });
+  }
+
+  function bindEditModal() {
+    var editModal = document.getElementById('editModal');
+    document.getElementById('editCloseBtn').addEventListener('click', function () { editModal.classList.remove('open'); });
+    document.getElementById('editCancelBtn').addEventListener('click', function () { editModal.classList.remove('open'); });
+    document.getElementById('editSubmitBtn').addEventListener('click', function () { editModal.classList.remove('open'); });
+    editModal.addEventListener('click', function (e) {
+      if (e.target === editModal) editModal.classList.remove('open');
+    });
+  }
+
+  function openEdit(row) {
+    var editModal = document.getElementById('editModal');
+    var tds = row.querySelectorAll('td');
+    /* 列顺序：账户名称/银行/账号/币别币种/充值账户/状态/操作 */
+    var setValue = function (id, v) { var el = document.getElementById(id); if (el) el.value = v; };
+    setValue('eBankName', tds[1].textContent.trim());
+    setValue('eAccountName', tds[0].textContent.trim());
+    setValue('eAccountNo', tds[2].textContent.trim());
+
+    var charge = document.getElementById('eChargeAccount');
+    if (charge) charge.innerHTML = '<option selected>' + tds[4].textContent.trim() + '</option>';
+
+    var curs = tds[3].textContent.trim().split(',');
+    document.querySelectorAll('#eCurrencyGroup input[type="checkbox"]').forEach(function (cb) {
+      cb.checked = curs.indexOf(cb.value) > -1;
+    });
+
+    /* 刷新字数统计 */
+    document.querySelectorAll('#editModal .input-wrap input').forEach(function (input) {
+      input.dispatchEvent(new Event('input'));
+    });
+
+    editModal.classList.add('open');
+  }
+
+  function renderTable(html) {
+    var doc = new DOMParser().parseFromString(html, 'text/html');
+    var rows = doc.querySelectorAll('.table-card tbody tr');
+    mtTableBody.innerHTML = '';
+    Array.prototype.forEach.call(rows, function (tr) {
+      var tds = tr.querySelectorAll('td');
+      var newTr = document.createElement('tr');
+      [0, 1, 2, 3, 4, 5].forEach(function (i) {
+        var td = document.createElement('td');
+        td.textContent = tds[i] ? tds[i].textContent.trim() : '';
+        newTr.appendChild(td);
+      });
+      var act = document.createElement('td');
+      act.innerHTML = '<a>编辑</a>';
+      act.querySelector('a').addEventListener('click', function () {
+        loadEditModal().then(function () { openEdit(newTr); });
+      });
+      newTr.appendChild(act);
+      mtTableBody.appendChild(newTr);
+    });
+    mtTableWrap.classList.add('show');
+  }
+
+  function viewList() {
+    fetchIndexHtml()
+      .then(function (html) {
+        renderTable(html);
+        mtWrap.classList.add('closed');
+        mtEmpty.classList.remove('show');
+      })
+      .catch(function () { location.href = 'index.html'; });  /* 无法读取时退回列表页 */
+  }
+
+  document.getElementById('mtViewBtn').addEventListener('click', viewList);
+  var mtViewLink = document.getElementById('mtViewLink');
+  if (mtViewLink) mtViewLink.addEventListener('click', viewList);
+</script>
+
+</body>
+</html>

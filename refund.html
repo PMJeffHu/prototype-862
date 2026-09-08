@@ -112,6 +112,40 @@
     pointer-events: none;
   }
 
+  /* 收款账号选择表格 */
+  .recv-table-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    overflow-x: scroll;   /* 常驻横向滚动条 */
+  }
+  .recv-table-card::-webkit-scrollbar { height: 8px; }
+  .recv-table-card::-webkit-scrollbar-track { background: #f5f6f8; border-radius: 4px; }
+  .recv-table-card::-webkit-scrollbar-thumb { background: #c7cbd1; border-radius: 4px; }
+  .recv-table-card::-webkit-scrollbar-thumb:hover { background: #a8adb5; }
+
+  .recv-table { width: 100%; border-collapse: collapse; min-width: 620px; }
+  .recv-table th {
+    background: #f9fafb;
+    text-align: left;
+    font-weight: 500;
+    color: rgba(0,0,0,.75);
+    padding: 9px 12px;
+    border-bottom: 1px solid #e5e7eb;
+    white-space: nowrap;
+  }
+  .recv-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #f0f0f0;
+    color: rgba(0,0,0,.8);
+    white-space: nowrap;
+  }
+  .recv-table tbody tr { cursor: pointer; }
+  .recv-table tbody tr:hover td { background: #f8fafc; }
+  .recv-table input[type="radio"] { accent-color: #1890ff; cursor: pointer; }
+  .recv-table .ellipsis { max-width: 150px; overflow: hidden; text-overflow: ellipsis; display: inline-block; vertical-align: bottom; }
+  .recv-table a { color: #1890ff; text-decoration: none; cursor: pointer; }
+  .recv-table a:hover { text-decoration: underline; }
+
   /* 金额行 */
   .amount-row { display: flex; gap: 8px; }
   .amount-row select { width: 140px; flex: 0 0 140px; }
@@ -277,16 +311,58 @@
           </div>
         </div>
 
-        <!-- 收款账户 -->
+        <!-- 收款账户（表格单选） -->
         <div class="form-item">
-          <label class="form-label"><span class="req">*</span>收款账户：</label>
+          <label class="form-label"><span class="req">*</span>请选择收款账号：</label>
           <div class="form-controls">
-            <select>
-              <option selected>请选择</option>
-              <option>AC056202 沈阳三只羊网络运营有限公司 中转代发</option>
-              <option>AC056278 香港 123</option>
-              <option>AC056258 GOGOMG INTERNATIONAL GROUP (HK) LIMITED 海外仓储</option>
-            </select>
+            <div class="recv-table-card">
+              <table class="recv-table">
+                <thead>
+                  <tr>
+                    <th style="width:40px"></th>
+                    <th>银行名称</th>
+                    <th>开户行名称</th>
+                    <th>银行账号</th>
+                    <th>币种</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="recvBody">
+                  <tr>
+                    <td><input type="radio" name="recvAcc" checked></td>
+                    <td><span class="ellipsis">BANK OF GANZHOU ...</span></td>
+                    <td>ACEL12201 zongteng</td>
+                    <td>--</td>
+                    <td>USD, EUR, HKD, GBP, ...</td>
+                    <td><a>编辑</a></td>
+                  </tr>
+                  <tr>
+                    <td><input type="radio" name="recvAcc"></td>
+                    <td><span class="ellipsis">AGRICULTURAL BAN ...</span></td>
+                    <td>zongteng</td>
+                    <td>1523865402</td>
+                    <td>USD, CNY</td>
+                    <td><a>编辑</a></td>
+                  </tr>
+                  <tr>
+                    <td><input type="radio" name="recvAcc"></td>
+                    <td><span class="ellipsis">CHINA DEVELOPME ...</span></td>
+                    <td>zongteng</td>
+                    <td>--</td>
+                    <td>GBP, HKD, EUR, USD</td>
+                    <td><a>编辑</a></td>
+                  </tr>
+                  <tr>
+                    <td><input type="radio" name="recvAcc"></td>
+                    <td><span class="ellipsis">Bank of Quanzhou C ...</span></td>
+                    <td>zongteng</td>
+                    <td>--</td>
+                    <td>USD, EUR, GBP, HKD</td>
+                    <td><a>编辑</a></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
@@ -357,6 +433,105 @@
   }
   refundType.addEventListener('change', syncReceiptRow);
   syncReceiptRow();
+
+  /* 收款账号表格：点击整行选中单选 */
+  var recvRows = document.querySelectorAll('#recvBody tr');
+  recvRows.forEach(function (tr) {
+    tr.addEventListener('click', function (e) {
+      if (e.target.tagName === 'A') return;
+      var radio = tr.querySelector('input[type="radio"]');
+      if (radio) radio.checked = true;
+    });
+  });
+
+  /* ===== 编辑：复用付款账户列表的「编辑付款账户」弹窗 ===== */
+  var editPromise = null;
+
+  /* 关闭事件：用事件委托，任何弹窗副本都能关闭 */
+  function bindEditModal(modalEl) {
+    if (!modalEl || modalEl.dataset.refundBound === '1') return;
+    modalEl.dataset.refundBound = '1';
+    ['editCloseBtn', 'editCancelBtn', 'editSubmitBtn'].forEach(function (id) {
+      var el = modalEl.querySelector('#' + id);
+      if (el) el.addEventListener('click', function () { modalEl.classList.remove('open'); });
+    });
+    modalEl.addEventListener('click', function (e) {
+      if (e.target === modalEl) modalEl.classList.remove('open');
+    });
+  }
+
+  /* 兜底：全局委托，保证关闭始终生效 */
+  document.addEventListener('click', function (e) {
+    var t = e.target && e.target.closest ? e.target.closest('#editCloseBtn, #editCancelBtn, #editSubmitBtn') : null;
+    if (!t) return;
+    var m = t.closest('.modal-mask');
+    if (m) m.classList.remove('open');
+  }, true);
+
+  function loadEditModal() {
+    if (document.getElementById('editModal')) {
+      bindEditModal(document.getElementById('editModal'));
+      return Promise.resolve();
+    }
+    if (!editPromise) {
+      editPromise = fetch('index.html', { cache: 'no-store' })
+        .then(function (r) { return r.text(); })
+        .then(function (html) {
+          var doc = new DOMParser().parseFromString(html, 'text/html');
+          var modal = doc.getElementById('editModal');
+          if (!modal) return;
+          var st = document.createElement('style');
+          st.textContent = Array.prototype.map.call(doc.querySelectorAll('style'), function (s) {
+            return s.textContent;
+          }).join('\n');
+          document.head.appendChild(st);
+          document.body.appendChild(modal);
+
+          var editModal = document.getElementById('editModal');
+          bindEditModal(editModal);
+        });
+    }
+    return editPromise;
+  }
+
+  function openEdit(row) {
+    var editModal = document.getElementById('editModal');
+    if (!editModal) return;
+    var tds = row.querySelectorAll('td');
+    /* 列顺序：单选/银行名称/开户行名称/银行账号/币种/操作 */
+    var setValue = function (id, v) { var el = document.getElementById(id); if (el) el.value = v; };
+
+    /* 银行名称：无匹配选项时替换为该行银行全称 */
+    var bankName = tds[1].textContent.trim();
+    var bankSel = document.getElementById('eBankName');
+    if (bankSel) {
+      var hit = Array.prototype.some.call(bankSel.options, function (o) { return o.text === bankName; });
+      if (!hit) bankSel.innerHTML = '<option selected>' + bankName + '</option>';
+      else bankSel.value = bankName;
+    }
+    setValue('eAccountName', tds[2].textContent.trim());
+    setValue('eAccountNo', tds[3].textContent.trim());
+    var charge = document.getElementById('eChargeAccount');
+    if (charge) charge.innerHTML = '<option selected>' + tds[2].textContent.trim() + '</option>';
+
+    var curs = tds[4].textContent.toUpperCase().split(/[,\/]/).map(function (s) { return s.trim(); });
+    document.querySelectorAll('#eCurrencyGroup input[type="checkbox"]').forEach(function (cb) {
+      cb.checked = curs.indexOf(cb.value) > -1;
+    });
+    document.querySelectorAll('#editModal .input-wrap input').forEach(function (input) {
+      input.dispatchEvent(new Event('input'));
+    });
+    editModal.classList.add('open');
+  }
+
+  document.querySelectorAll('#recvBody a').forEach(function (a) {
+    if (a.textContent.trim() !== '编辑') return;
+    a.addEventListener('click', function (e) {
+      e.stopPropagation();
+      loadEditModal().then(function () { openEdit(a.closest('tr')); })
+        .catch(function () { location.href = 'index.html'; });
+    });
+  });
 
   /* 退款事由字数统计 */
   var reason = document.getElementById('reasonInput');
