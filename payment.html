@@ -305,6 +305,13 @@
     font-size: 12px;
     line-height: 1.6;
   }
+  /* 常显说明文字 */
+  .gcf-tip {
+    margin-top: 6px;
+    color: #FA8C16;
+    font-size: 12px;
+    line-height: 1.6;
+  }
 
   .gcf-check-group { display: flex; flex-wrap: wrap; padding-top: 6px; }
   .gcf-check-group label {
@@ -767,6 +774,7 @@
               <label class="gcf-form-label"><span class="req">*</span>Payer-City：</label>
               <div class="gcf-form-controls">
                 <input type="text">
+                <div class="gcf-tip">For corporate payers: Please fill in the city of the enterprise’s registered address. For individual payers: Please fill in the city stated on the individual’s ID card.</div>
               </div>
             </div>
 
@@ -996,7 +1004,10 @@
 
             <div class="gcf-form-item">
               <label class="gcf-form-label"><span class="req">*</span>Payer-City：</label>
-              <div class="gcf-form-controls"><input type="text" value="1" disabled></div>
+              <div class="gcf-form-controls">
+                <input type="text" value="1" disabled>
+                <div class="gcf-tip">For corporate payers: Please fill in the city of the enterprise’s registered address. For individual payers: Please fill in the city stated on the individual’s ID card.</div>
+              </div>
             </div>
 
             <div class="gcf-form-item">

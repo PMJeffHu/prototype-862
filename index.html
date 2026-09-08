@@ -264,6 +264,8 @@
 
   .form-hint { margin-top: 4px; color: rgba(0,0,0,.45); font-size: 12px; line-height: 1.5; }
   .form-warning { margin-top: 4px; color: #fa8c16; font-size: 12px; line-height: 1.5; }
+  /* 常显说明文字（黄色） */
+  .form-tip { margin-top: 6px; color: #FA8C16; font-size: 12px; line-height: 1.6; }
 
   .input-wrap { position: relative; }
   .input-wrap .count {
@@ -650,8 +652,9 @@
             <option>中国香港</option>
             <option>美国</option>
             <option>新加坡</option>
+            <option>澳大利亚</option>
           </select>
-          <div class="form-warning">加拿大当地付款时需要付款人提供收款人地址信息。此银行未来可能用于接收工资，因此需要提前提供。</div>
+          <div class="form-warning" id="aCountryNotice">加拿大当地付款时需要付款人提供收款人地址信息。此银行未来可能用于接收工资，因此需要提前提供。</div>
         </div>
       </div>
 
@@ -674,6 +677,14 @@
       <!-- Swift Code -->
       <div class="form-item" id="aSwiftRow">
         <label class="form-label"><span class="req">*</span>Swift Code：</label>
+        <div class="form-controls">
+          <input type="text">
+        </div>
+      </div>
+
+      <!-- 本地清算号（仅澳大利亚显示） -->
+      <div class="form-item" id="aLocalClearRow" style="display:none;">
+        <label class="form-label"><span class="req">*</span>本地清算号：</label>
         <div class="form-controls">
           <input type="text">
         </div>
@@ -710,20 +721,21 @@
         </div>
       </div>
 
-      <!-- 付款方城市名 -->
+      <!-- 付款方城市 -->
       <div class="form-item">
-        <label class="form-label"><span class="req">*</span>付款方城市名：</label>
+        <label class="form-label"><span class="req">*</span>付款方城市：</label>
         <div class="form-controls">
           <div class="input-wrap">
             <input type="text" maxlength="35">
             <span class="count">0/35</span>
           </div>
+          <div class="form-tip">付款方为企业则填写企业注册地址所在城市；付款方为个人则填写个人身份证所在城市。</div>
         </div>
       </div>
 
-      <!-- 付款方街道名 -->
+      <!-- 付款方街道 -->
       <div class="form-item" id="aStreetRow">
-        <label class="form-label"><span class="req">*</span>付款方街道名：</label>
+        <label class="form-label"><span class="req">*</span>付款方街道：</label>
         <div class="form-controls">
           <div class="input-wrap">
             <input type="text" maxlength="70">
@@ -930,17 +942,18 @@
       </div>
 
       <div class="form-item">
-        <label class="form-label"><span class="req">*</span>付款方城市名：</label>
+        <label class="form-label"><span class="req">*</span>付款方城市：</label>
         <div class="form-controls">
           <div class="input-wrap">
             <input type="text" id="eCity" maxlength="35" value="多伦多">
             <span class="count">0/35</span>
           </div>
+          <div class="form-tip">付款方为企业则填写企业注册地址所在城市；付款方为个人则填写个人身份证所在城市。</div>
         </div>
       </div>
 
       <div class="form-item">
-        <label class="form-label"><span class="req">*</span>付款方街道名：</label>
+        <label class="form-label"><span class="req">*</span>付款方街道：</label>
         <div class="form-controls">
           <div class="input-wrap">
             <input type="text" maxlength="70" value="1">
@@ -1067,13 +1080,17 @@
       var v = aCountry.value;
       var isCA = v === '加拿大';
       var isCN = v === '中国';
-      /* 非加拿大：隐藏付款方街道名/建筑号/邮编 */
+      /* 非加拿大：隐藏付款方街道/建筑号/邮编 */
       show(ids.street, isCA);
       show(ids.building, isCA);
       show(ids.zip, isCA);
       /* 中国：显示联行号、隐藏 Swift Code；其他国家相反 */
       show(ids.union, isCN);
       show(ids.swift, !isCN);
+      /* 加拿大提示文案仅加拿大显示 */
+      show('aCountryNotice', isCA);
+      /* 本地清算号仅澳大利亚显示 */
+      show('aLocalClearRow', v === '澳大利亚');
       /* 境内汇款代码始终隐藏 */
       show(ids.domestic, false);
     }
