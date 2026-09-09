@@ -181,6 +181,11 @@
     color: rgba(0,0,0,.45);
     cursor: not-allowed;
   }
+  input[readonly].gray-dark {
+    background: #d9d9d9;
+    color: rgba(0,0,0,.65);
+    cursor: not-allowed;
+  }
   .edit-modal { width: 720px; }
 
   /* ===== 新增弹窗 ===== */
@@ -666,7 +671,7 @@
       <div class="form-item" id="aUnionRow">
         <label class="form-label"><span class="req">*</span>联行号：</label>
         <div class="form-controls">
-          <input type="text" readonly class="gray">
+          <input type="text" readonly class="gray-dark">
         </div>
       </div>
 
@@ -902,7 +907,7 @@
       <div class="form-item" id="eUnionRow">
         <label class="form-label"><span class="req">*</span>联行号：</label>
         <div class="form-controls">
-          <input type="text" id="eUnionCode" readonly class="gray">
+          <input type="text" id="eUnionCode" readonly class="gray-dark">
         </div>
       </div>
 
