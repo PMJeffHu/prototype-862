@@ -1253,9 +1253,9 @@
       var isCN = v === 'CN[China]';
       var isAU = v === 'AU[Austrilia]';
       var isCA = v === 'CA[Canada]';
-      /* CN：展示 Bank Union Code（不可修改）、隐藏 Swift Code；非 CN 相反 */
+      /* CN：展示 Bank Union Code（不可修改）；Swift Code 默认展示（不随国家隐藏） */
       show('editUnionRow', isCN);
-      show('editSwiftRow', !isCN);
+      show('editSwiftRow', true);
       /* BCI Code：CN 隐藏；其他国家展示且非必填；仅 AU 必填（加星号） */
       show('editBciRow', !isCN);
       show('editBciReq', isAU);
