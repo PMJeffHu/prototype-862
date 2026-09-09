@@ -666,7 +666,7 @@
       <div class="form-item" id="aUnionRow">
         <label class="form-label"><span class="req">*</span>联行号：</label>
         <div class="form-controls">
-          <input type="text">
+          <input type="text" disabled>
         </div>
       </div>
 
@@ -1217,8 +1217,8 @@
 
     /* 加拿大提示文案 */
     eShow('eCountryNotice', isCA);
-    /* 中国：隐藏 Swift Code、境内汇款代码；非中国：隐藏联行号 */
-    eShow('eSwiftRow', !isCN);
+    /* Swift Code 默认展示（不随国家隐藏）；境内汇款代码：非中国隐藏；中国：展示联行号 */
+    eShow('eSwiftRow', true);
     eShow('eDomesticRow', !isCN);
     eShow('eUnionRow', isCN);
     /* 澳大利亚：境内汇款代码必填（加星号） */
