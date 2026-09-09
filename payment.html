@@ -990,7 +990,7 @@
               </div>
             </div>
 
-            <div class="gcf-form-item">
+            <div class="gcf-form-item" id="editBciRow">
               <label class="gcf-form-label"><span class="req" id="editBciReq" style="display:none;">*</span>BCI Code：<span class="mark-you">[优]</span></label>
               <div class="gcf-form-controls">
                 <input type="text">
@@ -1256,7 +1256,8 @@
       /* CN：展示 Bank Union Code（不可修改）、隐藏 Swift Code；非 CN 相反 */
       show('editUnionRow', isCN);
       show('editSwiftRow', !isCN);
-      /* AU：BCI Code 必填（加星号），其他值非必填 */
+      /* BCI Code：CN 隐藏；其他国家展示且非必填；仅 AU 必填（加星号） */
+      show('editBciRow', !isCN);
       show('editBciReq', isAU);
       /* CA：展示 Payer-Street / Payer-Unit/Civic No. / Payer-Zip Code（必填） */
       show('editStreetRow', isCA);
