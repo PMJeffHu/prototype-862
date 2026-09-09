@@ -678,9 +678,9 @@
         </div>
       </div>
 
-      <!-- 本地清算号（仅澳大利亚显示） -->
+      <!-- 境内汇款代码（仅澳大利亚显示） -->
       <div class="form-item" id="aLocalClearRow" style="display:none;">
-        <label class="form-label"><span class="req">*</span>本地清算号：</label>
+        <label class="form-label"><span class="req">*</span>境内汇款代码：</label>
         <div class="form-controls">
           <input type="text">
           <div class="form-tip">本地汇款需要提供,如BSBcode/Routing number/Sort Code等</div>
@@ -1095,7 +1095,7 @@
       show(ids.swift, !isCN);
       /* 加拿大提示文案仅加拿大显示 */
       show('aCountryNotice', isCA);
-      /* 本地清算号仅澳大利亚显示 */
+      /* 境内汇款代码仅澳大利亚显示 */
       show('aLocalClearRow', v === '澳大利亚');
       /* 境内汇款代码始终隐藏 */
       show(ids.domestic, false);
